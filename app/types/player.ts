@@ -18,7 +18,7 @@ export interface Player {
     playerAbilities: Ability[];
     gender: Gender;
     nationality: Nationality;
-    team: Nationality;
+    team: Team;
     position: Position;
     stats: { [key: string]: Stat };
 }
@@ -44,7 +44,13 @@ export interface Nationality {
     id: number;
     label: string;
     imageUrl: string;
-    isPopular?: boolean;
+}
+
+export interface Team {
+    id: number;
+    label: string;
+    imageUrl: string;
+    isPopular: boolean;
 }
 
 export interface Ability {
