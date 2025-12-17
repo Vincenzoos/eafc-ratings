@@ -13,7 +13,7 @@ export default function TableRow({
 }: TableRowProps) {
     return (
         <tr
-            className={`border-b border-gray-800 hover:bg-gray-900 transition ${isAlternate ? "bg-black" : "bg-gray-950"
+            className={`border-none"
                 }`}
         >
             {children}
