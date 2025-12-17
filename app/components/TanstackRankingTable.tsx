@@ -3,6 +3,7 @@ import { Suspense, use } from "react";
 import { Player } from "../types/player";
 import { useReactTable, getCoreRowModel, flexRender, Row, ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
+import Avatar from "./Avatar";
 
 interface TanstackRankingTable {
     playersPromise: Promise<Player[]>
@@ -31,9 +32,9 @@ export default function TanstackRankingTable(
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <img src={p.shieldUrl} alt={`${p.firstName} ${p.lastName} shield`} width={24} height={24} style={{ borderRadius: 4 }} />
-                        <span>{`${p.firstName} ${p.lastName}`}</span>
+                    <div className="flex items-center gap-2">
+                        <Avatar src={p.shieldUrl} alt={`${p.firstName} ${p.lastName} shield`} />
+                        <span className="text-sm">{`${p.firstName} ${p.lastName}`}</span>
                     </div>
                 );
             },
@@ -45,13 +46,13 @@ export default function TanstackRankingTable(
                 const nat = row.original.nationality;
                 if (!nat) return null; // safety: no nationality
                 return (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div className="flex items-center gap-8">
                         <img
                             src={nat.imageUrl}
                             alt={nat.label}
                             width={20}
                             height={14}
-                            style={{ objectFit: "cover", borderRadius: 2 }}
+                            className="object-cover rounded-sm"
                             loading="lazy"
                         />
                     </div>
@@ -65,13 +66,13 @@ export default function TanstackRankingTable(
                 const team = row.original.team;
                 if (!team) return null; // safety: no nationality
                 return (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <div className="flex items-center gap-8">
                         <img
                             src={team.imageUrl}
                             alt={team.label}
                             width={20}
                             height={14}
-                            style={{ objectFit: "cover", borderRadius: 2 }}
+                            className="object-cover rounded-sm"
                             loading="lazy"
                         />
                     </div>
