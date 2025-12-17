@@ -13,8 +13,7 @@ export default function TableRow({
 }: TableRowProps) {
     return (
         <tr
-            className={`border-none"
-                }`}
+            className={`border-none`}
         >
             {children}
         </tr>

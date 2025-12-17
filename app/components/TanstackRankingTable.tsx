@@ -35,12 +35,12 @@ export default function TanstackRankingTable(
             accessorKey: "rank",
             header: "RANK",
             cell: ({ row }) => (
-                <div className="text-green-400 font-bold text-center">{row.original.rank}</div>
+                <div className="font-bold text-center">{row.original.rank}</div>
             ),
             size: 60,
         },
         {
-            accessorFn: (row: Player) => `${row.firstName} ${row.lastName}`,
+            accessorKey: "player",
             header: "PLAYER",
             cell: ({ row }) => {
                 const p = row.original;
@@ -102,7 +102,7 @@ export default function TanstackRankingTable(
                 if (!label) return null;
 
                 if (/\b(goalkeeper)\b/i.test(label)) {
-                    return <span title={label} className="font-semibold text-gray-300">GK</span>;
+                    return <div title={label} className="flex items-center justify-center"><span className="font-bold text-white bg-gray-700 px-2 py-1 rounded">GK</span></div>;
                 }
 
                 const words = label.split(/[\s-]+/).map(w => w.replace(/[^A-Za-z]/g, "")).filter(Boolean);
@@ -111,7 +111,7 @@ export default function TanstackRankingTable(
                         ? words[0].slice(0, 2).toUpperCase()
                         : words.map(w => w[0]?.toUpperCase() ?? "").join("");
 
-                return <span title={label} className="font-semibold text-gray-300">{abbr}</span>;
+                return <div title={label} className="flex items-center justify-center"><span className="font-bold text-white bg-gray-700 px-2 py-1 rounded">{abbr}</span></div>;
             },
             size: 50,
         },
@@ -153,6 +153,7 @@ export default function TanstackRankingTable(
                                 <TableHeaderCell
                                     key={header.id}
                                     width={header.getSize()}
+                                    align={["position", "overallRating"].includes(header.column.id) ? "center" : "left"}
                                 >
                                     {flexRender(header.column.columnDef.header, header.getContext())}
                                 </TableHeaderCell>
@@ -170,6 +171,7 @@ export default function TanstackRankingTable(
                                 <TableCell
                                     key={cell.id}
                                     width={cell.column.columnDef.size}
+                                    columnId={cell.column.id}
                                 >
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </TableCell>
