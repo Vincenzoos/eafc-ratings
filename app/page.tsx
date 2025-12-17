@@ -1,6 +1,4 @@
 import { getPlayers } from "./services/ApiService";
-import RankingTable from "./components/RankingTable";
-import TanstackTable from "./components/TanstackTable";
 import TanstackRankingTable from "./components/TanstackRankingTable";
 
 export default function Home() {

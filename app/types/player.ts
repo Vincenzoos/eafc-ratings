@@ -70,3 +70,14 @@ export interface Stat {
     value: number;
     diff: number;
 }
+
+
+// Stat column mappings to match EA website
+export const STAT_COLUMNS = [
+    { key: "pac", label: "PAC" },
+    { key: "sho", label: "SHO" },
+    { key: "pas", label: "PAS" },
+    { key: "dri", label: "DRI" },
+    { key: "def", label: "DEF" },
+    { key: "phy", label: "PHY" },
+];

@@ -1,6 +1,6 @@
 "use client"
 import { Suspense, use } from "react";
-import { Player } from "../types/player";
+import { Player, STAT_COLUMNS } from "../types/player";
 import { useReactTable, getCoreRowModel, flexRender, Row, ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import Avatar from "./Avatar";
@@ -18,15 +18,7 @@ interface TanstackRankingTable {
     playersPromise: Promise<Player[]>
 }
 
-// Stat column mappings to match EA website
-const STAT_COLUMNS = [
-    { key: "pace", label: "PAC" },
-    { key: "shooting", label: "SHO" },
-    { key: "passing", label: "PAS" },
-    { key: "dribbling", label: "DRI" },
-    { key: "defense", label: "DEF" },
-    { key: "physical", label: "PHY" },
-];
+
 
 export default function TanstackRankingTable(
     { playersPromise }: TanstackRankingTable
