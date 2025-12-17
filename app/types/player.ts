@@ -4,7 +4,7 @@ export interface Player {
     overallRating: number;
     firstName: string;
     lastName: string;
-    commonName: null;
+    commonName: null | string;
     birthdate: string;
     height: number;
     skillMoves: number;

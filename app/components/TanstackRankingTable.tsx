@@ -47,7 +47,7 @@ export default function TanstackRankingTable(
                 return (
                     <div className="flex items-center gap-3 min-w-max">
                         <Avatar src={p.shieldUrl} alt={`${p.firstName} ${p.lastName} shield`} />
-                        <span className="text-sm text-white">{`${p.firstName} ${p.lastName}`}</span>
+                        <span className="text-sm text-white">{p.commonName ?? `${p.firstName} ${p.lastName}`}</span>
                     </div>
                 );
             },

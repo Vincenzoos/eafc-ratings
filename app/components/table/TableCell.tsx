@@ -17,7 +17,7 @@ export default function TableCell({ children, width, columnId }: TableCellProps)
 
     return (
         <td
-            className={`px-4 py-3 text-sm uppercase tracking-wider ${hoverClass}`}
+            className={`px-4 py-3 text-sm tracking-wider ${hoverClass}`}
             style={{ width: width && width !== 150 ? `${width}px` : "auto" }}
         >
             {children}
