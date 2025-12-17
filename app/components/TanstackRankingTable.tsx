@@ -4,10 +4,30 @@ import { Player } from "../types/player";
 import { useReactTable, getCoreRowModel, flexRender, Row, ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import Avatar from "./Avatar";
+import {
+    TableContainer,
+    TableHead,
+    TableHeaderRow,
+    TableHeaderCell,
+    TableBody,
+    TableRow,
+    TableCell,
+} from "./table";
 
 interface TanstackRankingTable {
     playersPromise: Promise<Player[]>
 }
+
+// Stat column mappings to match EA website
+const STAT_COLUMNS = [
+    { key: "pace", label: "PAC" },
+    { key: "shooting", label: "SHO" },
+    { key: "passing", label: "PAS" },
+    { key: "dribbling", label: "DRI" },
+    { key: "defense", label: "DEF" },
+    { key: "physical", label: "PHY" },
+];
+
 export default function TanstackRankingTable(
     { playersPromise }: TanstackRankingTable
 ) {
@@ -20,21 +40,22 @@ export default function TanstackRankingTable(
     // Define columns
     const columns: ColumnDef<Player>[] = useMemo(() => [
         {
-            // defines the key from the data object being passed in to the table.
             accessorKey: "rank",
-            header: "Rank",
+            header: "RANK",
+            cell: ({ row }) => (
+                <div className="text-green-400 font-bold text-center">{row.original.rank}</div>
+            ),
+            size: 60,
         },
         {
-            // Compute field for full name, allow sorting/filtering
-            // can use cell if sorting/fitering on field not needed
             accessorFn: (row: Player) => `${row.firstName} ${row.lastName}`,
-            header: "Player",
+            header: "PLAYER",
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3 min-w-max">
                         <Avatar src={p.shieldUrl} alt={`${p.firstName} ${p.lastName} shield`} />
-                        <span className="text-sm">{`${p.firstName} ${p.lastName}`}</span>
+                        <span className="text-sm text-white">{`${p.firstName} ${p.lastName}`}</span>
                     </div>
                 );
             },
@@ -44,40 +65,42 @@ export default function TanstackRankingTable(
             header: "NAT",
             cell: ({ row }) => {
                 const nat = row.original.nationality;
-                if (!nat) return null; // safety: no nationality
+                if (!nat) return null;
                 return (
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center justify-center">
                         <img
                             src={nat.imageUrl}
                             alt={nat.label}
-                            width={20}
-                            height={14}
+                            width={24}
+                            height={16}
                             className="object-cover rounded-sm"
                             loading="lazy"
                         />
                     </div>
                 );
             },
+            size: 50,
         },
         {
             accessorKey: "team",
             header: "TEAM",
             cell: ({ row }) => {
                 const team = row.original.team;
-                if (!team) return null; // safety: no nationality
+                if (!team) return null;
                 return (
-                    <div className="flex items-center gap-8">
+                    <div className="flex items-center justify-center">
                         <img
                             src={team.imageUrl}
                             alt={team.label}
-                            width={20}
-                            height={14}
+                            width={24}
+                            height={24}
                             className="object-cover rounded-sm"
                             loading="lazy"
                         />
                     </div>
                 );
             },
+            size: 50,
         },
         {
             accessorKey: "position",
@@ -86,27 +109,39 @@ export default function TanstackRankingTable(
                 const label = row.original.position?.label?.trim() ?? "";
                 if (!label) return null;
 
-                // Special-case goalkeeper/keeper -> "GK"
                 if (/\b(goalkeeper)\b/i.test(label)) {
-                    return <span title={label}>GK</span>;
+                    return <span title={label} className="font-semibold text-gray-300">GK</span>;
                 }
 
-                // Split on spaces and hyphens, remove empty parts
                 const words = label.split(/[\s-]+/).map(w => w.replace(/[^A-Za-z]/g, "")).filter(Boolean);
-
                 const abbr =
                     words.length === 1
-                        ? words[0].slice(0, 2).toUpperCase()           // single word -> first 2 letters uppercased
-                        : words.map(w => w[0]?.toUpperCase() ?? "").join(""); // multiword -> first letters
+                        ? words[0].slice(0, 2).toUpperCase()
+                        : words.map(w => w[0]?.toUpperCase() ?? "").join("");
 
-                return <span title={label}>{abbr}</span>;
+                return <span title={label} className="font-semibold text-gray-300">{abbr}</span>;
             },
+            size: 50,
         },
         {
-            // defines the key from the data object being passed in to the table.
             accessorKey: "overallRating",
             header: "OVR",
+            cell: ({ row }) => (
+                <div className="text-center font-bold text-white bg-gray-700 px-2 py-1 rounded">{row.original.overallRating}</div>
+            ),
+            size: 50,
         },
+        ...STAT_COLUMNS.map(stat => ({
+            accessorFn: (row: Player) => row.stats?.[stat.key]?.value ?? "-",
+            header: stat.label,
+            cell: ({ row }: { row: any }) => {
+                const value = row.original.stats?.[stat.key]?.value ?? "-";
+                return (
+                    <div className="text-center text-gray-300 font-semibold">{value}</div>
+                );
+            },
+            size: 50,
+        })),
     ], []);
 
     // Tanstack Table instance
@@ -117,33 +152,40 @@ export default function TanstackRankingTable(
     })
 
     return (
-        // Suspense shows "placeholder" content when data loading, swaps to real content when data ready
-        <Suspense fallback={<p>Loading...</p>}>
-            <table>
-                <thead>
+        <Suspense fallback={<p className="text-white p-4">Loading...</p>}>
+            <TableContainer>
+                <TableHead>
                     {table.getHeaderGroups().map(headerGroup => (
-                        <tr key={headerGroup.id}>
+                        <TableHeaderRow key={headerGroup.id}>
                             {headerGroup.headers.map(header => (
-                                <th key={header.id} onClick={header.column.getToggleSortingHandler()}>
+                                <TableHeaderCell
+                                    key={header.id}
+                                    width={header.getSize()}
+                                >
                                     {flexRender(header.column.columnDef.header, header.getContext())}
-                                    {/* Add sort indicators */}
-                                </th>
+                                </TableHeaderCell>
                             ))}
-                        </tr>
+                        </TableHeaderRow>
                     ))}
-                </thead>
-                <tbody>
-                    {table.getRowModel().rows.map(row => (
-                        <tr key={row.id}>
+                </TableHead>
+                <TableBody>
+                    {table.getRowModel().rows.map((row, idx) => (
+                        <TableRow
+                            key={row.id}
+                            isAlternate={idx % 2 !== 0}
+                        >
                             {row.getVisibleCells().map(cell => (
-                                <td key={cell.id}>
+                                <TableCell
+                                    key={cell.id}
+                                    width={cell.column.columnDef.size}
+                                >
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </td>
+                                </TableCell>
                             ))}
-                        </tr>
+                        </TableRow>
                     ))}
-                </tbody>
-            </table>
+                </TableBody>
+            </TableContainer>
         </Suspense>
     )
 }
