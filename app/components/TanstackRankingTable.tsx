@@ -35,7 +35,7 @@ export default function TanstackRankingTable(
             accessorKey: "rank",
             header: "RANK",
             cell: ({ row }) => (
-                <div className="font-bold text-center">{row.original.rank}</div>
+                <div className="text-lg font-bold text-center">{row.original.rank}</div>
             ),
             size: 60,
         },
@@ -47,7 +47,7 @@ export default function TanstackRankingTable(
                 return (
                     <div className="flex items-center gap-3 min-w-max">
                         <Avatar src={p.shieldUrl} alt={`${p.firstName} ${p.lastName} shield`} />
-                        <span className="text-sm text-white">{p.commonName ?? `${p.firstName} ${p.lastName}`}</span>
+                        <span className="text-lg text-white">{p.commonName ?? `${p.firstName} ${p.lastName}`}</span>
                     </div>
                 );
             },
@@ -63,15 +63,14 @@ export default function TanstackRankingTable(
                         <img
                             src={nat.imageUrl}
                             alt={nat.label}
-                            width={24}
-                            height={16}
+                            width={50}
                             className="object-cover rounded-sm"
                             loading="lazy"
                         />
                     </div>
                 );
             },
-            size: 50,
+            size: 85,
         },
         {
             accessorKey: "team",
@@ -84,15 +83,14 @@ export default function TanstackRankingTable(
                         <img
                             src={team.imageUrl}
                             alt={team.label}
-                            width={24}
-                            height={24}
+                            width={50}
                             className="object-cover rounded-sm"
                             loading="lazy"
                         />
                     </div>
                 );
             },
-            size: 50,
+            size: 80,
         },
         {
             accessorKey: "position",
