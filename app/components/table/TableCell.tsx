@@ -5,20 +5,18 @@ import { ReactNode } from "react";
 interface TableCellProps {
     children: ReactNode;
     width?: number;
-    columnId?: string;
+    isHoverable?: boolean;
+    noPadding?: boolean;
 }
 
-const HOVERABLE_COLUMNS = ["player", "nationality", "team", "position"];
-
-export default function TableCell({ children, width, columnId }: TableCellProps) {
-    const isHoverable = columnId && HOVERABLE_COLUMNS.includes(columnId);
-    // Add rounded corners on hover and smooth color transition
+export default function TableCell({ children, width, noPadding = false, isHoverable }: TableCellProps) {
     const hoverClass = isHoverable ? "hover:bg-[#4b4b4b]/60 hover:rounded-md transition-colors duration-150 cursor-pointer" : "";
+    const paddingClass = noPadding ? "p-0" : "px-2 py-0";
 
     return (
         <td
-            className={`px-4 py-3 text-sm tracking-wider ${hoverClass}`}
-            style={{ width: width && width !== 150 ? `${width}px` : "auto" }}
+            className={`${paddingClass} text-sm tracking-wider ${hoverClass}`}
+            style={{ width: width ? `${width}px` : "auto" }}
         >
             {children}
         </td>

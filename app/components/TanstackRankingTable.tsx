@@ -42,6 +42,7 @@ export default function TanstackRankingTable(
         {
             accessorKey: "player",
             header: "PLAYER",
+            meta: { hoverable: true },
             cell: ({ row }) => {
                 const p = row.original;
                 return (
@@ -55,6 +56,7 @@ export default function TanstackRankingTable(
         {
             accessorKey: "nationality",
             header: "NAT",
+            meta: { hoverable: true },
             cell: ({ row }) => {
                 const nat = row.original.nationality;
                 if (!nat) return null;
@@ -75,7 +77,8 @@ export default function TanstackRankingTable(
         {
             accessorKey: "team",
             header: "TEAM",
-            cell: ({ row }) => {
+            meta: { hoverable: true },
+            cell: ({ row }: any) => {
                 const team = row.original.team;
                 if (!team) return null;
                 return (
@@ -95,6 +98,7 @@ export default function TanstackRankingTable(
         {
             accessorKey: "position",
             header: "POS",
+            meta: { hoverable: true },
             cell: ({ row }) => {
                 const label = row.original.position?.label?.trim() ?? "";
                 if (!label) return null;
@@ -117,20 +121,27 @@ export default function TanstackRankingTable(
             accessorKey: "overallRating",
             header: "OVR",
             cell: ({ row }) => (
-                <div className="text-center font-bold text-white bg-gray-700 px-2 py-1 rounded">{row.original.overallRating}</div>
+                <div className="w-full h-full flex items-center justify-center bg-gray-700 py-6 rounded">{row.original.overallRating}</div>
             ),
-            size: 50,
+            size: 150,
         },
-        ...STAT_COLUMNS.map(stat => ({
-            accessorFn: (row: Player) => row.stats?.[stat.key]?.value ?? "-",
+        ...STAT_COLUMNS.map((stat, index) => ({
+            accessorFn: (row: Player) => row.stats?.[stat.key] ?? "-",
             header: stat.label,
-            cell: ({ row }: { row: any }) => {
+            meta: { fillBackground: true },
+            cell: ({ row }: any) => {
                 const value = row.original.stats?.[stat.key]?.value ?? "-";
+                const isFirstStat = index === 0;
+                const isLastStat = index === STAT_COLUMNS.length - 1;
+                const borderRadiusClass = `${isFirstStat ? 'rounded-l' : ''} ${isLastStat ? 'rounded-r' : ''}`;
+
                 return (
-                    <div className="text-center text-gray-300 font-semibold">{value}</div>
+                    <div className={`w-full h-full flex items-center justify-center bg-gray-700 py-6 ${borderRadiusClass}`}>
+                        <span className="text-center text-gray-300 font-semibold">{value}</span>
+                    </div>
                 );
             },
-            size: 50,
+            size: 100,
         })),
     ], []);
 
@@ -169,7 +180,8 @@ export default function TanstackRankingTable(
                                 <TableCell
                                     key={cell.id}
                                     width={cell.column.columnDef.size}
-                                    columnId={cell.column.id}
+                                    isHoverable={!!(cell.column.columnDef as any).meta?.hoverable}
+                                    noPadding={!!(cell.column.columnDef as any).meta?.fillBackground}
                                 >
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                 </TableCell>
@@ -178,6 +190,6 @@ export default function TanstackRankingTable(
                     ))}
                 </TableBody>
             </TableContainer>
-        </Suspense>
+        </Suspense >
     )
 }

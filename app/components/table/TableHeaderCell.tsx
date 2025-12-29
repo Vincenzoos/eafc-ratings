@@ -17,8 +17,8 @@ export default function TableHeaderCell({
 
     return (
         <th
-            className={`px-4 py-3 ${alignClass} text-green-400 font-bold text-xs`}
-            style={{ width: width && width !== 150 ? `${width}px` : "auto" }}
+            className={`px-2 py-3 ${alignClass} text-green-400 font-bold text-xs`}
+            style={{ width: width ? `${width}px` : "auto" }}
         >
             {children}
         </th>
