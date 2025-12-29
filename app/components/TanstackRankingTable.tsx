@@ -31,6 +31,13 @@ export default function TanstackRankingTable(
 
     // Define columns
     const columns: ColumnDef<Player>[] = useMemo(() => [
+        // Left margin column
+        {
+            id: "leftMargin",
+            header: "",
+            cell: () => null,
+            size: 200, // Adjust this value to control left padding
+        },
         {
             accessorKey: "rank",
             header: "RANK",
@@ -46,7 +53,7 @@ export default function TanstackRankingTable(
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <div className="flex items-center gap-3 min-w-max">
+                    <div className="flex items-center gap-3 min-w-max py-1">
                         <Avatar src={p.shieldUrl} alt={`${p.firstName} ${p.lastName} shield`} />
                         <span className="text-lg text-white">{p.commonName ?? `${p.firstName} ${p.lastName}`}</span>
                     </div>
@@ -143,6 +150,13 @@ export default function TanstackRankingTable(
             },
             size: 100,
         })),
+        // Right margin column
+        {
+            id: "rightMargin",
+            header: "",
+            cell: () => null,
+            size: 200, // Adjust this value to control right padding
+        },
     ], []);
 
     // Tanstack Table instance

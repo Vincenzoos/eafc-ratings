@@ -9,8 +9,8 @@ interface TableContainerProps {
 export default function TableContainer({ children }: TableContainerProps) {
     return (
         <div className="w-full overflow-x-auto bg-black">
-            {/* Use border-separate and Tailwind arbitrary property to add vertical gap between header and body */}
-            <table className="w-full border-separate [border-spacing:0_0.5rem]">
+            {/* border-collapse to remove gaps between cells */}
+            <table className="w-full border-collapse">
                 {children}
             </table>
         </div>

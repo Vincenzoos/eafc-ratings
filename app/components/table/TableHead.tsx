@@ -7,5 +7,6 @@ interface TableHeadProps {
 }
 
 export default function TableHead({ children }: TableHeadProps) {
-    return <thead>{children}</thead>;
+    // use after pseudo-element to create spacing below the header
+    return <thead className="[&_tr]:border-t-2 [&_tr]:border-b-2 [&_tr]:border-[#4b4b4b] after:content-[''] after:block after:h-6">{children}</thead>;
 }

@@ -19,7 +19,7 @@ export default function Home() {
         </div>
       </section>
 
-      <div className="flex flex-col items-center">
+      <div className="w-full">
         <TanstackRankingTable playersPromise={playersPromise} />
       </div>
     </div>
