@@ -1,7 +1,13 @@
 "use client"
 import { Suspense, use, useState } from "react";
 import { Player, STAT_COLUMNS } from "../types/player";
-import { useReactTable, getCoreRowModel, flexRender, Row, ColumnDef, getPaginationRowModel } from "@tanstack/react-table";
+import {
+    useReactTable,
+    getCoreRowModel,
+    getFilteredRowModel,
+    flexRender, ColumnDef,
+    getPaginationRowModel
+} from "@tanstack/react-table";
 import { useMemo } from "react";
 import Avatar from "./Avatar";
 import Pagination from "./Pagination";
@@ -14,12 +20,27 @@ import {
     TableRow,
     TableCell,
 } from "./table";
+import SearchBar from "./SearchBar";
+import { rankItem } from "@tanstack/match-sorter-utils";
 
 interface TanstackRankingTable {
     playersPromise: Promise<Player[]>
 }
 
 
+
+const fuzzyFilter = (row: any, columnId: any, value: any, addMeta: any) => {
+    // Rank the item
+    const itemRank = rankItem(row.getValue(columnId), value);
+
+    // Store the itemRank info
+    addMeta({
+        itemRank,
+    });
+
+    // Return if the item should be filtered in/out
+    return itemRank.passed;
+};
 
 export default function TanstackRankingTable(
     { playersPromise }: TanstackRankingTable
@@ -35,6 +56,9 @@ export default function TanstackRankingTable(
         pageIndex: 0,
         pageSize: 10, // Default page size is passed as a prop
     });
+
+    // Add global filter state
+    const [globalFilter, setGlobalFilter] = useState("");
 
     // Define columns
     const columns: ColumnDef<Player>[] = useMemo(() => [
@@ -54,7 +78,8 @@ export default function TanstackRankingTable(
             size: 60,
         },
         {
-            accessorKey: "player",
+            // Custom accessor to use player names for sorting and filtering
+            accessorFn: (row) => row.commonName ?? `${row.firstName} ${row.lastName}`,
             header: "PLAYER",
             meta: { hoverable: true },
             cell: ({ row }) => {
@@ -66,6 +91,7 @@ export default function TanstackRankingTable(
                     </div>
                 );
             },
+            filterFn: fuzzyFilter,
         },
         {
             accessorKey: "nationality",
@@ -170,60 +196,82 @@ export default function TanstackRankingTable(
     const table = useReactTable({
         data,
         columns,
+        filterFns: {
+            fuzzy: fuzzyFilter, // Register fuzzy filter globally
+        },
         state: {
+            globalFilter, // Manage the global filter state
             pagination, // Bind pagination state
         },
         onPaginationChange: setPagination, // Handle pagination state changes
+        onGlobalFilterChange: setGlobalFilter, // Update the global filter state when it changes
+        globalFilterFn: fuzzyFilter, // Specify the fuzzy filter function for global filtering
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(), // Enable filtering
         getPaginationRowModel: getPaginationRowModel(),
     })
 
     return (
-        <Suspense fallback={<p className="text-white p-4">Loading...</p>}>
-            <TableContainer>
-                <TableHead>
-                    {table.getHeaderGroups().map(headerGroup => (
-                        <TableHeaderRow key={headerGroup.id}>
-                            {headerGroup.headers.map(header => (
-                                <TableHeaderCell
-                                    key={header.id}
-                                    width={header.getSize()}
-                                    align={["player"].includes(header.column.id) ? "left" : "center"}
-                                >
-                                    {flexRender(header.column.columnDef.header, header.getContext())}
-                                </TableHeaderCell>
-                            ))}
-                        </TableHeaderRow>
-                    ))}
-                </TableHead>
-                <TableBody>
-                    {table.getRowModel().rows.map((row, idx) => (
-                        <TableRow
-                            key={row.id}
-                            isAlternate={idx % 2 !== 0}
-                        >
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell
-                                    key={cell.id}
-                                    width={cell.column.columnDef.size}
-                                    isHoverable={!!(cell.column.columnDef as any).meta?.hoverable}
-                                    noPadding={!!(cell.column.columnDef as any).meta?.fillBackground}
-                                >
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </TableContainer>
+        <>
+            {/* SearchBar */}
+            <div className="w-full bg-black -mt-20 pb-20">
+                <SearchBar
+                    placeholder="Search players..."
+                    onSearch={(query) => setGlobalFilter(query)}
+                    defaultValue={globalFilter}
+                    className="max-w-2xl mx-auto"
+                />
+            </div >
 
-            <Pagination
-                currentPage={table.getState().pagination.pageIndex + 1}
-                totalPages={table.getPageCount()}
-                onPageChange={(page) => table.setPageIndex(page - 1)}
-                canPreviousPage={table.getCanPreviousPage()}
-                canNextPage={table.getCanNextPage()}
-            />
-        </Suspense >
+            {/* TODO: Add Filter section */}
+            <Suspense fallback={<p className="text-white p-4">Loading...</p>}>
+                {/* Table */}
+                <TableContainer>
+                    <TableHead>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableHeaderRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => (
+                                    <TableHeaderCell
+                                        key={header.id}
+                                        width={header.getSize()}
+                                        align={["player"].includes(header.column.id) ? "left" : "center"}
+                                    >
+                                        {flexRender(header.column.columnDef.header, header.getContext())}
+                                    </TableHeaderCell>
+                                ))}
+                            </TableHeaderRow>
+                        ))}
+                    </TableHead>
+                    <TableBody>
+                        {table.getRowModel().rows.map((row, idx) => (
+                            <TableRow
+                                key={row.id}
+                                isAlternate={idx % 2 !== 0}
+                            >
+                                {row.getVisibleCells().map(cell => (
+                                    <TableCell
+                                        key={cell.id}
+                                        width={cell.column.columnDef.size}
+                                        isHoverable={!!(cell.column.columnDef as any).meta?.hoverable}
+                                        noPadding={!!(cell.column.columnDef as any).meta?.fillBackground}
+                                    >
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </TableContainer>
+
+                {/* Pagination */}
+                <Pagination
+                    currentPage={table.getState().pagination.pageIndex + 1}
+                    totalPages={table.getPageCount()}
+                    onPageChange={(page) => table.setPageIndex(page - 1)}
+                    canPreviousPage={table.getCanPreviousPage()}
+                    canNextPage={table.getCanNextPage()}
+                />
+            </Suspense >
+        </>
     )
 }
