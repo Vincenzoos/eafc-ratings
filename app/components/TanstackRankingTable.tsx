@@ -1,9 +1,10 @@
 "use client"
-import { Suspense, use } from "react";
+import { Suspense, use, useState } from "react";
 import { Player, STAT_COLUMNS } from "../types/player";
-import { useReactTable, getCoreRowModel, flexRender, Row, ColumnDef } from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, flexRender, Row, ColumnDef, getPaginationRowModel } from "@tanstack/react-table";
 import { useMemo } from "react";
 import Avatar from "./Avatar";
+import Pagination from "./Pagination";
 import {
     TableContainer,
     TableHead,
@@ -28,6 +29,12 @@ export default function TanstackRankingTable(
 
     // Define data source
     const data = useMemo(() => players, []);
+
+    // State for pagination, including page index and page size
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 10, // Default page size is passed as a prop
+    });
 
     // Define columns
     const columns: ColumnDef<Player>[] = useMemo(() => [
@@ -64,7 +71,7 @@ export default function TanstackRankingTable(
             accessorKey: "nationality",
             header: "NAT",
             meta: { hoverable: true },
-            cell: ({ row }) => {
+            cell: ({ row }: any) => {
                 const nat = row.original.nationality;
                 if (!nat) return null;
                 return (
@@ -106,7 +113,7 @@ export default function TanstackRankingTable(
             accessorKey: "position",
             header: "POS",
             meta: { hoverable: true },
-            cell: ({ row }) => {
+            cell: ({ row }: any) => {
                 const label = row.original.position?.label?.trim() ?? "";
                 if (!label) return null;
 
@@ -114,11 +121,11 @@ export default function TanstackRankingTable(
                     return <div title={label} className="flex items-center justify-center"><span className="font-bold text-white bg-gray-700 px-2 py-1 rounded">GK</span></div>;
                 }
 
-                const words = label.split(/[\s-]+/).map(w => w.replace(/[^A-Za-z]/g, "")).filter(Boolean);
+                const words = label.split(/[\s-]+/).map((w: any) => w.replace(/[^A-Za-z]/g, "")).filter(Boolean);
                 const abbr =
                     words.length === 1
                         ? words[0].slice(0, 2).toUpperCase()
-                        : words.map(w => w[0]?.toUpperCase() ?? "").join("");
+                        : words.map((w: any) => w[0]?.toUpperCase() ?? "").join("");
 
                 return <div title={label} className="flex items-center justify-center"><span className="font-bold text-white bg-gray-700 px-2 py-1 rounded">{abbr}</span></div>;
             },
@@ -163,7 +170,12 @@ export default function TanstackRankingTable(
     const table = useReactTable({
         data,
         columns,
+        state: {
+            pagination, // Bind pagination state
+        },
+        onPaginationChange: setPagination, // Handle pagination state changes
         getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
     })
 
     return (
@@ -204,6 +216,14 @@ export default function TanstackRankingTable(
                     ))}
                 </TableBody>
             </TableContainer>
+
+            <Pagination
+                currentPage={table.getState().pagination.pageIndex + 1}
+                totalPages={table.getPageCount()}
+                onPageChange={(page) => table.setPageIndex(page - 1)}
+                canPreviousPage={table.getCanPreviousPage()}
+                canNextPage={table.getCanNextPage()}
+            />
         </Suspense >
     )
 }
