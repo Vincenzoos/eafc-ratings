@@ -42,7 +42,7 @@ export default function TanstackRankingTable(
             accessorKey: "rank",
             header: "RANK",
             cell: ({ row }) => (
-                <div className="text-lg font-bold text-center">{row.original.rank}</div>
+                <div className="text-2xl font-extrabold text-center">{row.original.rank}</div>
             ),
             size: 60,
         },
@@ -128,7 +128,7 @@ export default function TanstackRankingTable(
             accessorKey: "overallRating",
             header: "OVR",
             cell: ({ row }) => (
-                <div className="w-full h-full flex items-center justify-center bg-gray-700 py-6 rounded">{row.original.overallRating}</div>
+                <div className="w-full h-full flex items-center justify-center bg-gray-700 py-6 rounded  font-normal text-lg">{row.original.overallRating}</div>
             ),
             size: 150,
         },
@@ -144,7 +144,7 @@ export default function TanstackRankingTable(
 
                 return (
                     <div className={`w-full h-full flex items-center justify-center bg-gray-700 py-6 ${borderRadiusClass}`}>
-                        <span className="text-center text-gray-300 font-semibold">{value}</span>
+                        <span className="text-center text-gray-300 font-normal text-lg">{value}</span>
                     </div>
                 );
             },
@@ -176,7 +176,7 @@ export default function TanstackRankingTable(
                                 <TableHeaderCell
                                     key={header.id}
                                     width={header.getSize()}
-                                    align={["position", "overallRating"].includes(header.column.id) ? "center" : "left"}
+                                    align={["player"].includes(header.column.id) ? "left" : "center"}
                                 >
                                     {flexRender(header.column.columnDef.header, header.getContext())}
                                 </TableHeaderCell>
