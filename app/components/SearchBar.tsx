@@ -1,11 +1,12 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
 type SearchBarProps = {
     placeholder?: string;
     ariaLabel?: string;
     defaultValue?: string;
+    value?: string;
     onSearch?: (query: string) => void;
     className?: string;
 };
@@ -14,10 +15,18 @@ export default function SearchBar({
     placeholder = 'Search Player',
     ariaLabel = 'Search players',
     defaultValue = '',
+    value: externalValue,
     onSearch,
     className,
 }: SearchBarProps) {
-    const [query, setQuery] = useState(defaultValue);
+    const [query, setQuery] = useState(externalValue ?? defaultValue);
+
+    // Sync with external value (globalFilterState of the table) changes (e.g., when Reset button is clicked)
+    useEffect(() => {
+        if (externalValue !== undefined) {
+            setQuery(externalValue);
+        }
+    }, [externalValue]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();

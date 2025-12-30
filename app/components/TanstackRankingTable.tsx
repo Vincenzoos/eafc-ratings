@@ -215,10 +215,11 @@ export default function TanstackRankingTable(
         <>
             {/* SearchBar */}
             <div className="w-full bg-black -mt-20 pb-20">
+                {/* set value to globalFilter, managed by table state */}
                 <SearchBar
                     placeholder="Search players..."
                     onSearch={(query) => setGlobalFilter(query)}
-                    defaultValue={globalFilter}
+                    value={globalFilter}
                     className="max-w-2xl mx-auto"
                 />
             </div >
@@ -243,34 +244,56 @@ export default function TanstackRankingTable(
                         ))}
                     </TableHead>
                     <TableBody>
-                        {table.getRowModel().rows.map((row, idx) => (
-                            <TableRow
-                                key={row.id}
-                                isAlternate={idx % 2 !== 0}
-                            >
-                                {row.getVisibleCells().map(cell => (
-                                    <TableCell
-                                        key={cell.id}
-                                        width={cell.column.columnDef.size}
-                                        isHoverable={!!(cell.column.columnDef as any).meta?.hoverable}
-                                        noPadding={!!(cell.column.columnDef as any).meta?.fillBackground}
-                                    >
-                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                    </TableCell>
-                                ))}
+                        {/* Show rows when there are results */}
+                        {table.getRowModel().rows.length > 0 ? (
+                            table.getRowModel().rows.map((row, idx) => (
+                                <TableRow
+                                    key={row.id}
+                                    isAlternate={idx % 2 !== 0}
+                                >
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell
+                                            key={cell.id}
+                                            width={cell.column.columnDef.size}
+                                            isHoverable={!!(cell.column.columnDef as any).meta?.hoverable}
+                                            noPadding={!!(cell.column.columnDef as any).meta?.fillBackground}
+                                        >
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            // Show not found message when no results
+                            <TableRow>
+                                <TableCell width={100} noPadding={false} colSpan={table.getAllColumns().length}>
+                                    <div className="flex flex-col items-center justify-center py-16 text-center w-full">
+                                        <div className="text-red-500 text-4xl mb-4">⚠</div>
+                                        <h3 className="text-white text-lg font-semibold mb-5">0 Results Found</h3>
+                                        <p className="text-white text-xl mb-5">Please try adjusting your search or filters</p>
+                                        <button
+                                            onClick={() => setGlobalFilter("")}
+                                            className="mt-4 px-6 py-2 border border-green-500 text-white text-md font-bold rounded-full hover:bg-green-500 hover:text-black transition"
+                                        >
+                                            Reset
+                                        </button>
+                                    </div>
+                                </TableCell>
                             </TableRow>
-                        ))}
+                        )}
                     </TableBody>
                 </TableContainer>
 
                 {/* Pagination */}
-                <Pagination
-                    currentPage={table.getState().pagination.pageIndex + 1}
-                    totalPages={table.getPageCount()}
-                    onPageChange={(page) => table.setPageIndex(page - 1)}
-                    canPreviousPage={table.getCanPreviousPage()}
-                    canNextPage={table.getCanNextPage()}
-                />
+                {/* Only show pagination when there are results */}
+                {table.getRowModel().rows.length > 0 && (
+                    <Pagination
+                        currentPage={table.getState().pagination.pageIndex + 1}
+                        totalPages={table.getPageCount()}
+                        onPageChange={(page) => table.setPageIndex(page - 1)}
+                        canPreviousPage={table.getCanPreviousPage()}
+                        canNextPage={table.getCanNextPage()}
+                    />)}
             </Suspense >
         </>
     )
