@@ -3,26 +3,34 @@ import { ArrowRight, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { GenderFilter, SORT_OPTIONS, SortOption } from "../types/filters";
+import PositionDetailView from "./PositionDetailView";
 
 interface FilterSidebarProps {
     isOpen: boolean;
     onClose: () => void;
-    onApplyFilters: (activeTab: GenderFilter, sortBy: SortOption) => void;
+    onApplyFilters: (activeTab: GenderFilter, sortBy: SortOption, selectedPositions: string[]) => void;
     onResetFilters: () => void;
     activeTab: GenderFilter;
     sortBy: SortOption;
+    selectedPositions: string[];
 }
 
-export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onResetFilters, activeTab: initialTab, sortBy: initialSort }: FilterSidebarProps) {
+export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onResetFilters, activeTab: initialTab, sortBy: initialSort, selectedPositions: initialPositions }: FilterSidebarProps) {
     const [activeTab, setActiveTab] = useState<GenderFilter>(initialTab);
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
     const [sortBy, setSortBy] = useState<SortOption>(initialSort);
     const [mounted, setMounted] = useState(false);
+    const [detailView, setDetailView] = useState<string | null>(null);
+    const [selectedPositions, setSelectedPositions] = useState<string[]>(initialPositions);
 
     useEffect(() => {
         setActiveTab(initialTab);
         setSortBy(initialSort);
-    }, [initialTab, initialSort, isOpen]);
+        setSelectedPositions(initialPositions);
+        if (!isOpen) {
+            setDetailView(null);
+        }
+    }, [initialTab, initialSort, initialPositions, isOpen]);
 
     useEffect(() => {
         setMounted(true);
@@ -37,6 +45,14 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
         );
     };
 
+    const togglePosition = (positionId: string) => {
+        setSelectedPositions(prev =>
+            prev.includes(positionId)
+                ? prev.filter(id => id !== positionId)
+                : [...prev, positionId]
+        );
+    };
+
     if (!mounted) return null;
 
     const sidebarContent = (
@@ -46,6 +62,16 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                 className={`fixed top-0 left-0 h-full w-100 bg-zinc-900 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
                     } overflow-y-auto shadow-2xl`}
             >
+                {/* Position Detail View Overlay */}
+                {detailView === "position" && (
+                    <PositionDetailView
+                        selectedPositions={selectedPositions}
+                        onTogglePosition={togglePosition}
+                        onBack={() => setDetailView(null)}
+                        onReset={() => setSelectedPositions([])}
+                        onApply={() => setDetailView(null)}
+                    />
+                )}
                 <div className="flex flex-col h-full">
                     {/* Header */}
                     <div className="flex items-center justify-between p-6 border-b border-gray-700">
@@ -95,9 +121,9 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                         <div className="border-b border-gray-700">
                             <button
                                 onClick={() => toggleSection("leagues")}
-                                className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 transition"
+                                className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 hover:underline hover:cursor-pointer transition"
                             >
-                                <span className="font-medium hover:underline hover:cursor-pointer">Leagues & Teams</span>
+                                <span className="font-medium">Leagues & Teams</span>
                                 <ArrowRight />
                             </button>
                             {expandedSections.includes("leagues") && (
@@ -111,27 +137,28 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                         {/* Position */}
                         <div className="border-b border-gray-700">
                             <button
-                                onClick={() => toggleSection("position")}
-                                className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 transition"
+                                onClick={() => setDetailView("position")}
+                                className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 hover:underline hover:cursor-pointer transition"
                             >
-                                <span className="font-medium hover:underline hover:cursor-pointer">Position</span>
-                                <ArrowRight />
-                            </button>
-                            {expandedSections.includes("position") && (
-                                <div className="px-6 pb-4 text-gray-400 text-sm">
-                                    {/* Add position options here */}
-                                    <p>Filter options coming soon...</p>
+                                <span className="font-medium">Position</span>
+                                <div className="flex items-center gap-2">
+                                    {selectedPositions.length > 0 && (
+                                        <span className="flex items-center justify-center w-6 h-6 bg-gray-700 text-white text-xs font-semibold rounded-full">
+                                            {selectedPositions.length}
+                                        </span>
+                                    )}
+                                    <ArrowRight />
                                 </div>
-                            )}
+                            </button>
                         </div>
 
                         {/* Nation */}
                         <div className="border-b border-gray-700">
                             <button
                                 onClick={() => toggleSection("nation")}
-                                className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 transition"
+                                className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 hover:underline hover:cursor-pointer transition"
                             >
-                                <span className="font-medium hover:underline hover:cursor-pointer">Nation</span>
+                                <span className="font-medium">Nation</span>
                                 <ArrowRight />
                             </button>
                             {expandedSections.includes("nation") && (
@@ -146,9 +173,9 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                         <div className="border-b border-gray-700">
                             <button
                                 onClick={() => toggleSection("playstyles")}
-                                className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 transition"
+                                className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 hover:underline hover:cursor-pointer transition"
                             >
-                                <span className="font-medium hover:underline hover:cursor-pointer">PlayStyles</span>
+                                <span className="font-medium">PlayStyles</span>
                                 <ArrowRight />
                             </button>
                             {expandedSections.includes("playstyles") && (
@@ -189,6 +216,7 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                             onClick={() => {
                                 setActiveTab("all");
                                 setSortBy("rank");
+                                setSelectedPositions([]);
                                 onResetFilters();
                             }}
                             className="flex-1 px-4 py-3 border border-gray-600 text-white rounded-full hover:bg-gray-800 transition font-medium"
@@ -196,7 +224,7 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                             Reset Filters
                         </button>
                         <button
-                            onClick={() => onApplyFilters(activeTab, sortBy)}
+                            onClick={() => onApplyFilters(activeTab, sortBy, selectedPositions)}
                             className="flex-1 px-4 py-3 bg-green-500 text-black rounded-full hover:bg-green-600 transition font-semibold"
                         >
                             Apply Filters

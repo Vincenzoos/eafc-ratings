@@ -10,3 +10,33 @@ export const SORT_OPTIONS = [
     { id: "defending" as const, label: "Defending" },
     { id: "physicality" as const, label: "Physicality" },
 ] as const;
+
+export const POSITION_OPTIONS = [
+    {
+        category: "Defense",
+        positions: [
+            { id: "GK", label: "Goalkeeper" },
+            { id: "CB", label: "Center Back" },
+            { id: "LB", label: "Left Back" },
+            { id: "RB", label: "Right Back" },
+        ]
+    },
+    {
+        category: "Midfielder",
+        positions: [
+            { id: "CDM", label: "Center Defensive Midfielder" },
+            { id: "CM", label: "Center Midfielder" },
+            { id: "CAM", label: "Center Attacking Midfielder" },
+            { id: "LM", label: "Left Midfielder" },
+            { id: "RM", label: "Right Midfielder" },
+        ]
+    },
+    {
+        category: "Attack",
+        positions: [
+            { id: "LW", label: "Left Wing" },
+            { id: "RW", label: "Right Wing" },
+            { id: "ST", label: "Striker" },
+        ]
+    }
+] as const;

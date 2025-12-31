@@ -79,6 +79,7 @@ export default function TanstackRankingTable(
     // Add filter states
     const [activeTab, setActiveTab] = useState<GenderFilter>("all");
     const [sortBy, setSortBy] = useState<SortOption>("rank");
+    const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
 
 
     // Define global filter state
@@ -283,24 +284,29 @@ export default function TanstackRankingTable(
         setGlobalFilter("");
         setActiveTab("all");
         setSortBy("rank");
+        setSelectedPositions([]);
     };
 
-    const handleApplyFilters = (tab: GenderFilter, sort: SortOption) => {
+    const handleApplyFilters = (tab: GenderFilter, sort: SortOption, positions: string[]) => {
         setActiveTab(tab);
         setSortBy(sort);
+        setSelectedPositions(positions);
         setIsFilterSidebarOpen(false);
     };
 
     const handleResetFilters = () => {
         setActiveTab("all");
         setSortBy("rank");
+        setSelectedPositions([]);
     };
 
-    const handleRemoveFilter = (filterType: "tab" | "sort") => {
+    const handleRemoveFilter = (filterType: "tab" | "sort" | "position", positionId?: string) => {
         if (filterType === "tab") {
             setActiveTab("all");
         } else if (filterType === "sort") {
             setSortBy("rank");
+        } else if (filterType === "position" && positionId) {
+            setSelectedPositions(prev => prev.filter(id => id !== positionId));
         }
     };
 
@@ -314,6 +320,7 @@ export default function TanstackRankingTable(
                 onResetFilters={handleResetFilters}
                 activeTab={activeTab}
                 sortBy={sortBy}
+                selectedPositions={selectedPositions}
             />
 
             {/* SearchBar */}
@@ -334,6 +341,7 @@ export default function TanstackRankingTable(
                 onResetAll={handleResetAll}
                 activeTab={activeTab}
                 sortBy={sortBy}
+                selectedPositions={selectedPositions}
                 onRemoveFilter={handleRemoveFilter}
             />
             {/* TODO: Replace loading text with skeleton table */}

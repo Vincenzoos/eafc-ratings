@@ -9,11 +9,12 @@ interface FilterBarProps {
     onResetAll: () => void;
     activeTab: GenderFilter;
     sortBy: SortOption;
-    onRemoveFilter: (filterType: "tab" | "sort") => void;
+    selectedPositions: string[];
+    onRemoveFilter: (filterType: "tab" | "sort" | "position", positionId?: string) => void;
 }
 
-export default function FilterBar({ onFilterClick, resultsCount, onResetAll, activeTab, sortBy, onRemoveFilter }: FilterBarProps) {
-    const showTags = activeTab !== "all" || sortBy !== "rank";
+export default function FilterBar({ onFilterClick, resultsCount, onResetAll, activeTab, sortBy, selectedPositions, onRemoveFilter }: FilterBarProps) {
+    const showTags = activeTab !== "all" || sortBy !== "rank" || selectedPositions.length > 0;
 
     return (
         <div className="w-full py-8">
@@ -65,6 +66,17 @@ export default function FilterBar({ onFilterClick, resultsCount, onResetAll, act
                                 </button>
                             </div>
                         )}
+                        {selectedPositions.map((positionId) => (
+                            <div key={positionId} className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 hover:cursor-pointer text-white rounded-lg text-sm font-bold">
+                                <span>{positionId}</span>
+                                <button
+                                    onClick={() => onRemoveFilter("position", positionId)}
+                                    className="hover:bg-gray-600 rounded-full p-0.5 transition"
+                                >
+                                    <X size={16} className="hover:cursor-pointer" />
+                                </button>
+                            </div>
+                        ))}
                     </>
                 )}
             </div>
