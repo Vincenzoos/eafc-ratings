@@ -24,6 +24,7 @@ import SearchBar from "./SearchBar";
 import FilterBar from "./FilterBar";
 import FilterSidebar from "./FilterSidebar";
 import { rankItem } from "@tanstack/match-sorter-utils";
+import { GenderFilter, SortOption } from "../types/filters";
 
 interface TanstackRankingTable {
     playersPromise: Promise<Player[]>
@@ -50,8 +51,24 @@ export default function TanstackRankingTable(
     // Use the 'use' hook to unwrap the promise and get the actual data
     const players = use(playersPromise);
 
+    // Add filter states
+    const [activeTab, setActiveTab] = useState<GenderFilter>("all");
+    const [sortBy, setSortBy] = useState<SortOption>("rank");
+
     // Define data source
-    const data = useMemo(() => players, []);
+    const data = useMemo(() => {
+        if (activeTab === "all") return players;
+
+        // Filter by gender based on activeTab
+        return players.filter(player => {
+            if (activeTab === "mens") {
+                return player.gender?.id === 0; // Assuming 0 is male
+            } else if (activeTab === "womens") {
+                return player.gender?.id === 1; // Assuming 1 is female
+            }
+            return true;
+        });
+    }, [players, activeTab]);
 
     // State for pagination, including page index and page size
     const [pagination, setPagination] = useState({
@@ -65,9 +82,7 @@ export default function TanstackRankingTable(
     // Add filter sidebar state
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
 
-    // Add filter states
-    const [activeTab, setActiveTab] = useState<"all" | "mens" | "womens">("all");
-    const [sortBy, setSortBy] = useState<string>("rank");
+
 
     // Define columns
     const columns: ColumnDef<Player>[] = useMemo(() => [
@@ -226,7 +241,7 @@ export default function TanstackRankingTable(
         setSortBy("rank");
     };
 
-    const handleApplyFilters = (tab: "all" | "mens" | "womens", sort: string) => {
+    const handleApplyFilters = (tab: GenderFilter, sort: SortOption) => {
         setActiveTab(tab);
         setSortBy(sort);
         setIsFilterSidebarOpen(false);

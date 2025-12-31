@@ -2,20 +2,21 @@
 import { ArrowRight, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { GenderFilter, SORT_OPTIONS, SortOption } from "../types/filters";
 
 interface FilterSidebarProps {
     isOpen: boolean;
     onClose: () => void;
-    onApplyFilters: (activeTab: "all" | "mens" | "womens", sortBy: string) => void;
+    onApplyFilters: (activeTab: GenderFilter, sortBy: SortOption) => void;
     onResetFilters: () => void;
-    activeTab: "all" | "mens" | "womens";
-    sortBy: string;
+    activeTab: GenderFilter;
+    sortBy: SortOption;
 }
 
 export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onResetFilters, activeTab: initialTab, sortBy: initialSort }: FilterSidebarProps) {
-    const [activeTab, setActiveTab] = useState<"all" | "mens" | "womens">(initialTab);
+    const [activeTab, setActiveTab] = useState<GenderFilter>(initialTab);
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
-    const [sortBy, setSortBy] = useState<string>(initialSort);
+    const [sortBy, setSortBy] = useState<SortOption>(initialSort);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -35,17 +36,6 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                 : [...prev, section]
         );
     };
-
-    const sortOptions = [
-        { id: "rank", label: "Rank" },
-        { id: "overall", label: "Overall" },
-        { id: "pace", label: "Pace" },
-        { id: "shooting", label: "Shooting" },
-        { id: "passing", label: "Passing" },
-        { id: "dribbling", label: "Dribbling" },
-        { id: "defending", label: "Defending" },
-        { id: "physicality", label: "Physicality" },
-    ];
 
     if (!mounted) return null;
 
@@ -173,7 +163,7 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                         <div className="p-6">
                             <h3 className="text-white font-medium mb-4">Sort by</h3>
                             <div className="grid grid-cols-2 gap-3">
-                                {sortOptions.map((option) => (
+                                {SORT_OPTIONS.map((option) => (
                                     <label
                                         key={option.id}
                                         className="flex items-center gap-2 text-gray-300 cursor-pointer hover:text-white transition"
@@ -183,7 +173,7 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                                             name="sort"
                                             value={option.id}
                                             checked={sortBy === option.id}
-                                            onChange={(e) => setSortBy(e.target.value)}
+                                            onChange={(e) => setSortBy(e.target.value as SortOption)}
                                             className="w-4 h-4 accent-green-500"
                                         />
                                         <span className="text-sm">{option.label}</span>

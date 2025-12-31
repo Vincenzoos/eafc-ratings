@@ -1,13 +1,14 @@
 "use client"
 
 import { SlidersVertical, X } from "lucide-react";
+import { GenderFilter, SortOption } from "../types/filters";
 
 interface FilterBarProps {
     onFilterClick: () => void;
     resultsCount: number;
     onResetAll: () => void;
-    activeTab: "all" | "mens" | "womens";
-    sortBy: string;
+    activeTab: GenderFilter;
+    sortBy: SortOption;
     onRemoveFilter: (filterType: "tab" | "sort") => void;
 }
 
@@ -15,15 +16,15 @@ export default function FilterBar({ onFilterClick, resultsCount, onResetAll, act
     const showTags = activeTab !== "all" || sortBy !== "rank";
 
     return (
-        <div className="w-full bg-black py-8 px-6 md:px-12">
-            <div className="max-w-7xl mx-auto flex items-center gap-6 flex-wrap">
+        <div className="w-full py-8">
+            <div className="max-w-7xl ml-50 flex items-center gap-6 flex-wrap">
                 {/* Filter Button */}
                 <button
                     onClick={onFilterClick}
                     className="flex items-center gap-2 px-4 py-2 border-2 border-green-500 text-white rounded-full hover:bg-green-500 hover:text-black transition font-semibold"
                 >
-                    <SlidersVertical />
                     Filter
+                    <SlidersVertical />
                 </button>
 
                 {/* Results Count */}
