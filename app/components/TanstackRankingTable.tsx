@@ -65,6 +65,10 @@ export default function TanstackRankingTable(
     // Add filter sidebar state
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
 
+    // Add filter states
+    const [activeTab, setActiveTab] = useState<"all" | "mens" | "womens">("all");
+    const [sortBy, setSortBy] = useState<string>("rank");
+
     // Define columns
     const columns: ColumnDef<Player>[] = useMemo(() => [
         // Left margin column
@@ -218,16 +222,27 @@ export default function TanstackRankingTable(
 
     const handleResetAll = () => {
         setGlobalFilter("");
-        // Add other reset logic here when filters are implemented
+        setActiveTab("all");
+        setSortBy("rank");
     };
 
-    const handleApplyFilters = () => {
+    const handleApplyFilters = (tab: "all" | "mens" | "womens", sort: string) => {
+        setActiveTab(tab);
+        setSortBy(sort);
         setIsFilterSidebarOpen(false);
-        // Add filter application logic here
     };
 
     const handleResetFilters = () => {
-        // Add filter reset logic here
+        setActiveTab("all");
+        setSortBy("rank");
+    };
+
+    const handleRemoveFilter = (filterType: "tab" | "sort") => {
+        if (filterType === "tab") {
+            setActiveTab("all");
+        } else if (filterType === "sort") {
+            setSortBy("rank");
+        }
     };
 
     return (
@@ -238,6 +253,8 @@ export default function TanstackRankingTable(
                 onClose={() => setIsFilterSidebarOpen(false)}
                 onApplyFilters={handleApplyFilters}
                 onResetFilters={handleResetFilters}
+                activeTab={activeTab}
+                sortBy={sortBy}
             />
 
             {/* SearchBar */}
@@ -256,6 +273,9 @@ export default function TanstackRankingTable(
                 onFilterClick={() => setIsFilterSidebarOpen(true)}
                 resultsCount={table.getFilteredRowModel().rows.length}
                 onResetAll={handleResetAll}
+                activeTab={activeTab}
+                sortBy={sortBy}
+                onRemoveFilter={handleRemoveFilter}
             />
             {/* TODO: Replace loading text with skeleton table */}
             <Suspense fallback={<p className="text-white p-4">Loading...</p>}>

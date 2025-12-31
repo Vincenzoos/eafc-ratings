@@ -6,15 +6,22 @@ import { createPortal } from "react-dom";
 interface FilterSidebarProps {
     isOpen: boolean;
     onClose: () => void;
-    onApplyFilters: () => void;
+    onApplyFilters: (activeTab: "all" | "mens" | "womens", sortBy: string) => void;
     onResetFilters: () => void;
+    activeTab: "all" | "mens" | "womens";
+    sortBy: string;
 }
 
-export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onResetFilters }: FilterSidebarProps) {
-    const [activeTab, setActiveTab] = useState<"all" | "mens" | "womens">("all");
+export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onResetFilters, activeTab: initialTab, sortBy: initialSort }: FilterSidebarProps) {
+    const [activeTab, setActiveTab] = useState<"all" | "mens" | "womens">(initialTab);
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
-    const [sortBy, setSortBy] = useState<string>("rank");
+    const [sortBy, setSortBy] = useState<string>(initialSort);
     const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setActiveTab(initialTab);
+        setSortBy(initialSort);
+    }, [initialTab, initialSort, isOpen]);
 
     useEffect(() => {
         setMounted(true);
@@ -189,13 +196,17 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                     {/* Footer Buttons */}
                     <div className="p-6 border-t border-gray-700 flex gap-3">
                         <button
-                            onClick={onResetFilters}
+                            onClick={() => {
+                                setActiveTab("all");
+                                setSortBy("rank");
+                                onResetFilters();
+                            }}
                             className="flex-1 px-4 py-3 border border-gray-600 text-white rounded-full hover:bg-gray-800 transition font-medium"
                         >
                             Reset Filters
                         </button>
                         <button
-                            onClick={onApplyFilters}
+                            onClick={() => onApplyFilters(activeTab, sortBy)}
                             className="flex-1 px-4 py-3 bg-green-500 text-black rounded-full hover:bg-green-600 transition font-semibold"
                         >
                             Apply Filters
