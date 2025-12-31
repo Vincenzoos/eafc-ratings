@@ -21,6 +21,8 @@ import {
     TableCell,
 } from "./table";
 import SearchBar from "./SearchBar";
+import FilterBar from "./FilterBar";
+import FilterSidebar from "./FilterSidebar";
 import { rankItem } from "@tanstack/match-sorter-utils";
 
 interface TanstackRankingTable {
@@ -59,6 +61,9 @@ export default function TanstackRankingTable(
 
     // Add global filter state
     const [globalFilter, setGlobalFilter] = useState("");
+
+    // Add filter sidebar state
+    const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
 
     // Define columns
     const columns: ColumnDef<Player>[] = useMemo(() => [
@@ -211,8 +216,30 @@ export default function TanstackRankingTable(
         getPaginationRowModel: getPaginationRowModel(),
     })
 
+    const handleResetAll = () => {
+        setGlobalFilter("");
+        // Add other reset logic here when filters are implemented
+    };
+
+    const handleApplyFilters = () => {
+        setIsFilterSidebarOpen(false);
+        // Add filter application logic here
+    };
+
+    const handleResetFilters = () => {
+        // Add filter reset logic here
+    };
+
     return (
         <>
+            {/* Filter Sidebar */}
+            <FilterSidebar
+                isOpen={isFilterSidebarOpen}
+                onClose={() => setIsFilterSidebarOpen(false)}
+                onApplyFilters={handleApplyFilters}
+                onResetFilters={handleResetFilters}
+            />
+
             {/* SearchBar */}
             <div className="w-full bg-black -mt-20 pb-20">
                 {/* set value to globalFilter, managed by table state */}
@@ -224,7 +251,13 @@ export default function TanstackRankingTable(
                 />
             </div >
 
-            {/* TODO: Add Filter section */}
+            {/* Filter Bar */}
+            <FilterBar
+                onFilterClick={() => setIsFilterSidebarOpen(true)}
+                resultsCount={table.getFilteredRowModel().rows.length}
+                onResetAll={handleResetAll}
+            />
+            {/* TODO: Replace loading text with skeleton table */}
             <Suspense fallback={<p className="text-white p-4">Loading...</p>}>
                 {/* Table */}
                 <TableContainer>
