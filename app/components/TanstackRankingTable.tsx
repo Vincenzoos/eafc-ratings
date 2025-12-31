@@ -1,10 +1,12 @@
 "use client"
-import { Suspense, use, useState } from "react";
+import { Suspense, use, useEffect, useState } from "react";
 import { Player, STAT_COLUMNS } from "../types/player";
 import {
     useReactTable,
     getCoreRowModel,
     getFilteredRowModel,
+    getSortedRowModel,
+    SortingState,
     flexRender, ColumnDef,
     getPaginationRowModel
 } from "@tanstack/react-table";
@@ -45,20 +47,54 @@ const fuzzyFilter = (row: any, columnId: any, value: any, addMeta: any) => {
     return itemRank.passed;
 };
 
+// Map SortOption to column accessor keys and sorting direction
+const getSortingFromOption = (sortOption: SortOption): SortingState => {
+    switch (sortOption) {
+        case "overall":
+            return [{ id: "overallRating", desc: true }]; // Descending (highest first)
+        case "pace":
+            return [{ id: "pac", desc: true }];
+        case "shooting":
+            return [{ id: "sho", desc: true }];
+        case "passing":
+            return [{ id: "pas", desc: true }];
+        case "dribbling":
+            return [{ id: "dri", desc: true }];
+        case "defending":
+            return [{ id: "def", desc: true }];
+        case "physicality":
+            return [{ id: "phy", desc: true }];
+        default:
+            return [{ id: "rank", desc: false }];
+    }
+};
+
 export default function TanstackRankingTable(
     { playersPromise }: TanstackRankingTable
 ) {
     // Use the 'use' hook to unwrap the promise and get the actual data
     const players = use(playersPromise);
 
+
     // Add filter states
     const [activeTab, setActiveTab] = useState<GenderFilter>("all");
     const [sortBy, setSortBy] = useState<SortOption>("rank");
 
+
+    // Define global filter state
+    const [globalFilter, setGlobalFilter] = useState("");
+    const [sorting, setSorting] = useState<SortingState>(getSortingFromOption(sortBy));
+
+
+    // Update sorting when sortBy changes
+    useEffect(() => {
+        setSorting(getSortingFromOption(sortBy));
+    }, [sortBy]);
+
+
     // Define data source
     const data = useMemo(() => {
         if (activeTab === "all") return players;
-
         // Filter by gender based on activeTab
         return players.filter(player => {
             if (activeTab === "mens") {
@@ -76,8 +112,6 @@ export default function TanstackRankingTable(
         pageSize: 10, // Default page size is passed as a prop
     });
 
-    // Add global filter state
-    const [globalFilter, setGlobalFilter] = useState("");
 
     // Add filter sidebar state
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
@@ -92,6 +126,7 @@ export default function TanstackRankingTable(
             header: "",
             cell: () => null,
             size: 200, // Adjust this value to control left padding
+            enableSorting: false,
         },
         {
             accessorKey: "rank",
@@ -105,6 +140,7 @@ export default function TanstackRankingTable(
             // Custom accessor to use player names for sorting and filtering
             accessorFn: (row) => row.commonName ?? `${row.firstName} ${row.lastName}`,
             header: "PLAYER",
+            id: "player",
             meta: { hoverable: true },
             cell: ({ row }) => {
                 const p = row.original;
@@ -182,6 +218,7 @@ export default function TanstackRankingTable(
             size: 50,
         },
         {
+            // Accessor key: direct access to record field (object from data/api)
             accessorKey: "overallRating",
             header: "OVR",
             cell: ({ row }) => (
@@ -190,7 +227,10 @@ export default function TanstackRankingTable(
             size: 150,
         },
         ...STAT_COLUMNS.map((stat, index) => ({
-            accessorFn: (row: Player) => row.stats?.[stat.key] ?? "-",
+            // Accessor function: custom logic to extract value from record
+            accessorFn: (row: Player) => row.stats?.[stat.key]?.value ?? 0,
+            // Unique ID for the column, used for sorting. Must be provided when using accessorFn
+            id: stat.key,
             header: stat.label,
             meta: { fillBackground: true },
             cell: ({ row }: any) => {
@@ -213,6 +253,7 @@ export default function TanstackRankingTable(
             header: "",
             cell: () => null,
             size: 200, // Adjust this value to control right padding
+            enableSorting: false,
         },
     ], []);
 
@@ -226,13 +267,16 @@ export default function TanstackRankingTable(
         state: {
             globalFilter, // Manage the global filter state
             pagination, // Bind pagination state
+            sorting, // Manage the sorting state
         },
         onPaginationChange: setPagination, // Handle pagination state changes
         onGlobalFilterChange: setGlobalFilter, // Update the global filter state when it changes
         globalFilterFn: fuzzyFilter, // Specify the fuzzy filter function for global filtering
+        onSortingChange: setSorting, // Update the sorting state when sorting changes
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(), // Enable filtering
-        getPaginationRowModel: getPaginationRowModel(),
+        getPaginationRowModel: getPaginationRowModel(), // Enable pagination
+        getSortedRowModel: getSortedRowModel(), // Enable sorting
     })
 
     const handleResetAll = () => {
