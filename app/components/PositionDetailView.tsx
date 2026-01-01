@@ -54,18 +54,22 @@ export default function PositionDetailView({
                             {category.positions.map((position) => (
                                 <label
                                     key={position.id}
-                                    className="flex items-center gap-3 py-3 text-gray-300 cursor-pointer hover:text-white transition"
+                                    className="flex items-center justify-between gap-3 py-3 px-3 rounded-lg hover:bg-zinc-800 cursor-pointer group"
                                 >
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedPositions.includes(position.id)}
-                                        onChange={() => onTogglePosition(position.id)}
-                                        className="w-3 h-3 rounded border-gray-600 text-green-500 focus:ring-green-500 accent-green-500 focus:ring-offset-0"
-                                    />
                                     <div className="flex items-center gap-3">
                                         <span className="text-xs font-bold text-white bg-gray-700 px-2 py-1 rounded min-w-10 text-center">{position.id}</span>
-                                        <span className="text-sm">{position.label}</span>
+                                        <span className="text-sm text-gray-300 group-hover:text-white">{position.label}</span>
                                     </div>
+                                    <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedPositions.includes(position.id) ? 'bg-green-500 border-green-500' : 'border-gray-500'
+                                        }`}>
+                                        {selectedPositions.includes(position.id) && <span className="text-black text-xs font-bold">✓</span>}
+                                    </div>
+                                    <input
+                                        type="checkbox"
+                                        className="hidden"
+                                        checked={selectedPositions.includes(position.id)}
+                                        onChange={() => onTogglePosition(position.id)}
+                                    />
                                 </label>
                             ))}
                         </div>
