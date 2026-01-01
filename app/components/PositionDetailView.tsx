@@ -1,5 +1,5 @@
 "use client"
-import { ChevronLeft } from "lucide-react";
+import { Check, ChevronLeft } from "lucide-react";
 import { POSITION_OPTIONS } from "../types/filters";
 
 interface PositionDetailViewProps {
@@ -60,9 +60,9 @@ export default function PositionDetailView({
                                         <span className="text-xs font-bold text-white bg-gray-700 px-2 py-1 rounded min-w-10 text-center">{position.id}</span>
                                         <span className="text-sm text-gray-300 group-hover:text-white">{position.label}</span>
                                     </div>
-                                    <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedPositions.includes(position.id) ? 'bg-green-500 border-green-500' : 'border-gray-500'
+                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${selectedPositions.includes(position.id) ? 'bg-green-500 border-green-500' : 'border-gray-500'
                                         }`}>
-                                        {selectedPositions.includes(position.id) && <span className="text-black text-xs font-bold">✓</span>}
+                                        {selectedPositions.includes(position.id) && <span className="text-black text-xs font-bold"><Check className="w-4 h-4" /></span>}
                                     </div>
                                     <input
                                         type="checkbox"

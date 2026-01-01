@@ -1,5 +1,5 @@
 "use client"
-import { ChevronLeft, ChevronDown, ChevronUp, Shield } from "lucide-react";
+import { ChevronLeft, ChevronDown, ChevronUp, Shield, Check } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { TEAM_OPTIONS } from "../types/filters";
@@ -34,9 +34,9 @@ const TeamItem = ({ team, isSelected, onToggle }: { team: typeof TEAM_OPTIONS[0]
                 </div>
                 <span className="text-gray-300 group-hover:text-white">{team.name}</span>
             </div>
-            <div className={`w-5 h-5 rounded border flex items-center justify-center ${isSelected ? 'bg-green-500 border-green-500' : 'border-gray-500'
+            <div className={`w-4 h-4 rounded border flex items-center justify-center ${isSelected ? 'bg-green-500 border-green-500' : 'border-gray-500'
                 }`}>
-                {isSelected && <span className="text-black text-xs font-bold">✓</span>}
+                {isSelected && <span className="text-black text-xs font-bold"><Check className="w-4 h-4" /></span>}
             </div>
             <input
                 type="checkbox"
@@ -131,9 +131,9 @@ export default function LeagueAndTeamDetailView({
                                 {/* Select All */}
                                 <label className="flex items-center justify-between p-3 rounded-lg hover:bg-zinc-800 cursor-pointer group">
                                     <span className="text-gray-300 group-hover:text-white">Select All</span>
-                                    <div className={`w-5 h-5 rounded border flex items-center justify-center ${areAllSelected(TEAM_OPTIONS) ? 'bg-green-500 border-green-500' : 'border-gray-500'
+                                    <div className={`w-4 h-4 rounded border flex items-center justify-center ${areAllSelected(TEAM_OPTIONS) ? 'bg-green-500 border-green-500' : 'border-gray-500'
                                         }`}>
-                                        {areAllSelected(TEAM_OPTIONS) && <span className="text-black text-xs font-bold">✓</span>}
+                                        {areAllSelected(TEAM_OPTIONS) && <span className="text-black text-xs font-bold"><Check className="w-4 h-4" /></span>}
                                     </div>
                                     <input
                                         type="checkbox"
