@@ -4,33 +4,37 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { GenderFilter, SORT_OPTIONS, SortOption } from "../types/filters";
 import PositionDetailView from "./PositionDetailView";
+import LeagueAndTeamDetailView from "./LeagueAndTeamDetailView";
 
 interface FilterSidebarProps {
     isOpen: boolean;
     onClose: () => void;
-    onApplyFilters: (activeTab: GenderFilter, sortBy: SortOption, selectedPositions: string[]) => void;
+    onApplyFilters: (activeTab: GenderFilter, sortBy: SortOption, selectedPositions: string[], selectedTeams: string[]) => void;
     onResetFilters: () => void;
     activeTab: GenderFilter;
     sortBy: SortOption;
     selectedPositions: string[];
+    selectedTeams?: string[];
 }
 
-export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onResetFilters, activeTab: initialTab, sortBy: initialSort, selectedPositions: initialPositions }: FilterSidebarProps) {
+export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onResetFilters, activeTab: initialTab, sortBy: initialSort, selectedPositions: initialPositions, selectedTeams: initialTeams = [] }: FilterSidebarProps) {
     const [activeTab, setActiveTab] = useState<GenderFilter>(initialTab);
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
     const [sortBy, setSortBy] = useState<SortOption>(initialSort);
     const [mounted, setMounted] = useState(false);
     const [detailView, setDetailView] = useState<string | null>(null);
     const [selectedPositions, setSelectedPositions] = useState<string[]>(initialPositions);
+    const [selectedTeams, setSelectedTeams] = useState<string[]>(initialTeams);
 
     useEffect(() => {
         setActiveTab(initialTab);
         setSortBy(initialSort);
         setSelectedPositions(initialPositions);
+        setSelectedTeams(initialTeams);
         if (!isOpen) {
             setDetailView(null);
         }
-    }, [initialTab, initialSort, initialPositions, isOpen]);
+    }, [initialTab, initialSort, initialPositions, initialTeams, isOpen]);
 
     useEffect(() => {
         setMounted(true);
@@ -53,6 +57,14 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
         );
     };
 
+    const toggleTeam = (teamId: string) => {
+        setSelectedTeams(prev =>
+            prev.includes(teamId)
+                ? prev.filter(id => id !== teamId)
+                : [...prev, teamId]
+        );
+    };
+
     if (!mounted) return null;
 
     const sidebarContent = (
@@ -69,6 +81,16 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                         onTogglePosition={togglePosition}
                         onBack={() => setDetailView(null)}
                         onReset={() => setSelectedPositions([])}
+                        onApply={() => setDetailView(null)}
+                    />
+                )}
+                {/* League & Team Detail View Overlay */}
+                {detailView === "leagues" && (
+                    <LeagueAndTeamDetailView
+                        selectedTeams={selectedTeams}
+                        onToggleTeam={toggleTeam}
+                        onBack={() => setDetailView(null)}
+                        onReset={() => setSelectedTeams([])}
                         onApply={() => setDetailView(null)}
                     />
                 )}
@@ -120,18 +142,19 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                         {/* Leagues & Teams */}
                         <div className="border-b border-gray-700">
                             <button
-                                onClick={() => toggleSection("leagues")}
+                                onClick={() => setDetailView("leagues")}
                                 className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 hover:underline hover:cursor-pointer transition"
                             >
                                 <span className="font-medium">Leagues & Teams</span>
-                                <ArrowRight />
-                            </button>
-                            {expandedSections.includes("leagues") && (
-                                <div className="px-6 pb-4 text-gray-400 text-sm">
-                                    {/* Add league/team options here */}
-                                    <p>Filter options coming soon...</p>
+                                <div className="flex items-center gap-2">
+                                    {selectedTeams.length > 0 && (
+                                        <span className="flex items-center justify-center w-6 h-6 bg-gray-700 text-white text-xs font-semibold rounded-full">
+                                            {selectedTeams.length}
+                                        </span>
+                                    )}
+                                    <ArrowRight />
                                 </div>
-                            )}
+                            </button>
                         </div>
 
                         {/* Position */}
@@ -217,6 +240,7 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                                 setActiveTab("all");
                                 setSortBy("rank");
                                 setSelectedPositions([]);
+                                setSelectedTeams([]);
                                 onResetFilters();
                             }}
                             className="flex-1 px-4 py-3 border border-gray-600 text-white rounded-full hover:bg-gray-800 transition font-medium"
@@ -224,7 +248,7 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                             Reset Filters
                         </button>
                         <button
-                            onClick={() => onApplyFilters(activeTab, sortBy, selectedPositions)}
+                            onClick={() => onApplyFilters(activeTab, sortBy, selectedPositions, selectedTeams)}
                             className="flex-1 px-4 py-3 bg-green-500 text-black rounded-full hover:bg-green-600 transition font-semibold"
                         >
                             Apply Filters

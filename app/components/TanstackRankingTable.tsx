@@ -80,6 +80,7 @@ export default function TanstackRankingTable(
     const [activeTab, setActiveTab] = useState<GenderFilter>("all");
     const [sortBy, setSortBy] = useState<SortOption>("rank");
     const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
+    const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
 
 
     // Define global filter state
@@ -297,12 +298,14 @@ export default function TanstackRankingTable(
         setActiveTab("all");
         setSortBy("rank");
         setSelectedPositions([]);
+        setSelectedTeams([]);
     };
 
-    const handleApplyFilters = (tab: GenderFilter, sort: SortOption, positions: string[]) => {
+    const handleApplyFilters = (tab: GenderFilter, sort: SortOption, positions: string[], teams: string[]) => {
         setActiveTab(tab);
         setSortBy(sort);
         setSelectedPositions(positions);
+        setSelectedTeams(teams);
         setIsFilterSidebarOpen(false);
     };
 
@@ -310,15 +313,18 @@ export default function TanstackRankingTable(
         setActiveTab("all");
         setSortBy("rank");
         setSelectedPositions([]);
+        setSelectedTeams([]);
     };
 
-    const handleRemoveFilter = (filterType: "tab" | "sort" | "position", positionId?: string) => {
+    const handleRemoveFilter = (filterType: "tab" | "sort" | "position" | "team", filterId?: string) => {
         if (filterType === "tab") {
             setActiveTab("all");
         } else if (filterType === "sort") {
             setSortBy("rank");
-        } else if (filterType === "position" && positionId) {
-            setSelectedPositions(prev => prev.filter(id => id !== positionId));
+        } else if (filterType === "position" && filterId) {
+            setSelectedPositions(prev => prev.filter(id => id !== filterId));
+        } else if (filterType === "team" && filterId) {
+            setSelectedTeams(prev => prev.filter(id => id !== filterId));
         }
     };
 
@@ -333,6 +339,7 @@ export default function TanstackRankingTable(
                 activeTab={activeTab}
                 sortBy={sortBy}
                 selectedPositions={selectedPositions}
+                selectedTeams={selectedTeams}
             />
 
             {/* SearchBar */}
@@ -354,6 +361,7 @@ export default function TanstackRankingTable(
                 activeTab={activeTab}
                 sortBy={sortBy}
                 selectedPositions={selectedPositions}
+                selectedTeams={selectedTeams}
                 onRemoveFilter={handleRemoveFilter}
             />
             {/* TODO: Replace loading text with skeleton table */}

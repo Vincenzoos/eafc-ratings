@@ -1,7 +1,7 @@
 "use client"
 
 import { SlidersVertical, X } from "lucide-react";
-import { GenderFilter, SortOption } from "../types/filters";
+import { GenderFilter, SortOption, TEAM_OPTIONS } from "../types/filters";
 
 interface FilterBarProps {
     onFilterClick: () => void;
@@ -10,11 +10,12 @@ interface FilterBarProps {
     activeTab: GenderFilter;
     sortBy: SortOption;
     selectedPositions: string[];
-    onRemoveFilter: (filterType: "tab" | "sort" | "position", positionId?: string) => void;
+    selectedTeams?: string[];
+    onRemoveFilter: (filterType: "tab" | "sort" | "position" | "team", filterId?: string) => void;
 }
 
-export default function FilterBar({ onFilterClick, resultsCount, onResetAll, activeTab, sortBy, selectedPositions, onRemoveFilter }: FilterBarProps) {
-    const showTags = activeTab !== "all" || sortBy !== "rank" || selectedPositions.length > 0;
+export default function FilterBar({ onFilterClick, resultsCount, onResetAll, activeTab, sortBy, selectedPositions, selectedTeams = [], onRemoveFilter }: FilterBarProps) {
+    const showTags = activeTab !== "all" || sortBy !== "rank" || selectedPositions.length > 0 || selectedTeams.length > 0;
 
     return (
         <div className="w-full py-8">
@@ -71,6 +72,17 @@ export default function FilterBar({ onFilterClick, resultsCount, onResetAll, act
                                 <span>{positionId}</span>
                                 <button
                                     onClick={() => onRemoveFilter("position", positionId)}
+                                    className="hover:bg-gray-600 rounded-full p-0.5 transition"
+                                >
+                                    <X size={16} className="hover:cursor-pointer" />
+                                </button>
+                            </div>
+                        ))}
+                        {selectedTeams.map((teamId) => (
+                            <div key={teamId} className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 hover:cursor-pointer text-white rounded-lg text-sm font-bold">
+                                <span>{TEAM_OPTIONS.find(team => team.id === teamId)?.name}</span>
+                                <button
+                                    onClick={() => onRemoveFilter("team", teamId)}
                                     className="hover:bg-gray-600 rounded-full p-0.5 transition"
                                 >
                                     <X size={16} className="hover:cursor-pointer" />
