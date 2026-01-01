@@ -41,6 +41,16 @@ export const POSITION_OPTIONS = [
     }
 ] as const;
 
+export const NATION_OPTIONS = [
+    { id: "Argentina", name: "Argentina", flag: "https://flagcdn.com/w40/ar.png" },
+    { id: "Brazil", name: "Brazil", flag: "https://flagcdn.com/w40/br.png" },
+    { id: "England", name: "England", flag: "https://flagcdn.com/w40/gb-eng.png" },
+    { id: "France", name: "France", flag: "https://flagcdn.com/w40/fr.png" },
+    { id: "Germany", name: "Germany", flag: "https://flagcdn.com/w40/de.png" },
+    { id: "Italy", name: "Italy", flag: "https://flagcdn.com/w40/it.png" },
+    { id: "Spain", name: "Spain", flag: "https://flagcdn.com/w40/es.png" },
+] as const;
+
 
 export const TEAM_OPTIONS = [
     { id: "FC Barcelona", name: "FC Barcelona", logo: "https://drop-assets.ea.com/images/1omg1GUYiuhDZzro6k79Gp/c3c15c873e984dae4e34fac491248b33/l116325.png" },

@@ -1,7 +1,7 @@
 "use client"
 
 import { SlidersVertical, X } from "lucide-react";
-import { GenderFilter, SortOption, TEAM_OPTIONS } from "../types/filters";
+import { GenderFilter, SortOption, TEAM_OPTIONS, NATION_OPTIONS } from "../types/filters";
 
 interface FilterBarProps {
     onFilterClick: () => void;
@@ -11,11 +11,12 @@ interface FilterBarProps {
     sortBy: SortOption;
     selectedPositions: string[];
     selectedTeams?: string[];
-    onRemoveFilter: (filterType: "tab" | "sort" | "position" | "team", filterId?: string) => void;
+    selectedNations?: string[];
+    onRemoveFilter: (filterType: "tab" | "sort" | "position" | "team" | "nation", filterId?: string) => void;
 }
 
-export default function FilterBar({ onFilterClick, resultsCount, onResetAll, activeTab, sortBy, selectedPositions, selectedTeams = [], onRemoveFilter }: FilterBarProps) {
-    const showTags = activeTab !== "all" || sortBy !== "rank" || selectedPositions.length > 0 || selectedTeams.length > 0;
+export default function FilterBar({ onFilterClick, resultsCount, onResetAll, activeTab, sortBy, selectedPositions, selectedTeams = [], selectedNations = [], onRemoveFilter }: FilterBarProps) {
+    const showTags = activeTab !== "all" || sortBy !== "rank" || selectedPositions.length > 0 || selectedTeams.length > 0 || selectedNations.length > 0;
 
     return (
         <div className="w-full py-8">
@@ -83,6 +84,17 @@ export default function FilterBar({ onFilterClick, resultsCount, onResetAll, act
                                 <span>{TEAM_OPTIONS.find(team => team.id === teamId)?.name}</span>
                                 <button
                                     onClick={() => onRemoveFilter("team", teamId)}
+                                    className="hover:bg-gray-600 rounded-full p-0.5 transition"
+                                >
+                                    <X size={16} className="hover:cursor-pointer" />
+                                </button>
+                            </div>
+                        ))}
+                        {selectedNations.map((nationId) => (
+                            <div key={nationId} className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 hover:cursor-pointer text-white rounded-lg text-sm font-bold">
+                                <span>{NATION_OPTIONS.find(nation => nation.id === nationId)?.name}</span>
+                                <button
+                                    onClick={() => onRemoveFilter("nation", nationId)}
                                     className="hover:bg-gray-600 rounded-full p-0.5 transition"
                                 >
                                     <X size={16} className="hover:cursor-pointer" />

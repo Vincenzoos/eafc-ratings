@@ -81,6 +81,7 @@ export default function TanstackRankingTable(
     const [sortBy, setSortBy] = useState<SortOption>("rank");
     const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
     const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+    const [selectedNations, setSelectedNations] = useState<string[]>([]);
 
 
     // Define global filter state
@@ -120,9 +121,15 @@ export default function TanstackRankingTable(
             filteredPlayers = filteredPlayers.filter(player => player.team && selectedTeams.includes(player.team.label));
         }
 
+        // Filter by selected nations
+        if (selectedNations.length > 0) {
+            console.log("Filtering by nations:", selectedNations);
+            filteredPlayers = filteredPlayers.filter(player => player.nationality && selectedNations.includes(player.nationality.label));
+        }
+
         // Return final list of players after applying filters
         return filteredPlayers;
-    }, [players, activeTab, selectedPositions, selectedTeams]);
+    }, [players, activeTab, selectedPositions, selectedTeams, selectedNations]);
 
     // State for pagination, including page index and page size
     const [pagination, setPagination] = useState({
@@ -303,13 +310,15 @@ export default function TanstackRankingTable(
         setSortBy("rank");
         setSelectedPositions([]);
         setSelectedTeams([]);
+        setSelectedNations([]);
     };
 
-    const handleApplyFilters = (tab: GenderFilter, sort: SortOption, positions: string[], teams: string[]) => {
+    const handleApplyFilters = (tab: GenderFilter, sort: SortOption, positions: string[], teams: string[], nations: string[]) => {
         setActiveTab(tab);
         setSortBy(sort);
         setSelectedPositions(positions);
         setSelectedTeams(teams);
+        setSelectedNations(nations);
         setIsFilterSidebarOpen(false);
     };
 
@@ -318,9 +327,10 @@ export default function TanstackRankingTable(
         setSortBy("rank");
         setSelectedPositions([]);
         setSelectedTeams([]);
+        setSelectedNations([]);
     };
 
-    const handleRemoveFilter = (filterType: "tab" | "sort" | "position" | "team", filterId?: string) => {
+    const handleRemoveFilter = (filterType: "tab" | "sort" | "position" | "team" | "nation", filterId?: string) => {
         if (filterType === "tab") {
             setActiveTab("all");
         } else if (filterType === "sort") {
@@ -329,6 +339,8 @@ export default function TanstackRankingTable(
             setSelectedPositions(prev => prev.filter(id => id !== filterId));
         } else if (filterType === "team" && filterId) {
             setSelectedTeams(prev => prev.filter(id => id !== filterId));
+        } else if (filterType === "nation" && filterId) {
+            setSelectedNations(prev => prev.filter(id => id !== filterId));
         }
     };
 
@@ -344,6 +356,7 @@ export default function TanstackRankingTable(
                 sortBy={sortBy}
                 selectedPositions={selectedPositions}
                 selectedTeams={selectedTeams}
+                selectedNations={selectedNations}
             />
 
             {/* SearchBar */}
@@ -366,6 +379,7 @@ export default function TanstackRankingTable(
                 sortBy={sortBy}
                 selectedPositions={selectedPositions}
                 selectedTeams={selectedTeams}
+                selectedNations={selectedNations}
                 onRemoveFilter={handleRemoveFilter}
             />
             {/* TODO: Replace loading text with skeleton table */}

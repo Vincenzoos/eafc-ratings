@@ -5,19 +5,21 @@ import { createPortal } from "react-dom";
 import { GenderFilter, SORT_OPTIONS, SortOption } from "../types/filters";
 import PositionDetailView from "./PositionDetailView";
 import LeagueAndTeamDetailView from "./LeagueAndTeamDetailView";
+import NationDetailView from "./NationDetailView";
 
 interface FilterSidebarProps {
     isOpen: boolean;
     onClose: () => void;
-    onApplyFilters: (activeTab: GenderFilter, sortBy: SortOption, selectedPositions: string[], selectedTeams: string[]) => void;
+    onApplyFilters: (activeTab: GenderFilter, sortBy: SortOption, selectedPositions: string[], selectedTeams: string[], selectedNations: string[]) => void;
     onResetFilters: () => void;
     activeTab: GenderFilter;
     sortBy: SortOption;
     selectedPositions: string[];
     selectedTeams?: string[];
+    selectedNations?: string[];
 }
 
-export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onResetFilters, activeTab: initialTab, sortBy: initialSort, selectedPositions: initialPositions, selectedTeams: initialTeams = [] }: FilterSidebarProps) {
+export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onResetFilters, activeTab: initialTab, sortBy: initialSort, selectedPositions: initialPositions, selectedTeams: initialTeams = [], selectedNations: initialNations = [] }: FilterSidebarProps) {
     const [activeTab, setActiveTab] = useState<GenderFilter>(initialTab);
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
     const [sortBy, setSortBy] = useState<SortOption>(initialSort);
@@ -25,16 +27,18 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
     const [detailView, setDetailView] = useState<string | null>(null);
     const [selectedPositions, setSelectedPositions] = useState<string[]>(initialPositions);
     const [selectedTeams, setSelectedTeams] = useState<string[]>(initialTeams);
+    const [selectedNations, setSelectedNations] = useState<string[]>(initialNations);
 
     useEffect(() => {
         setActiveTab(initialTab);
         setSortBy(initialSort);
         setSelectedPositions(initialPositions);
         setSelectedTeams(initialTeams);
+        setSelectedNations(initialNations);
         if (!isOpen) {
             setDetailView(null);
         }
-    }, [initialTab, initialSort, initialPositions, initialTeams, isOpen]);
+    }, [initialTab, initialSort, initialPositions, initialTeams, initialNations, isOpen]);
 
     useEffect(() => {
         setMounted(true);
@@ -65,6 +69,14 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
         );
     };
 
+    const toggleNation = (nationId: string) => {
+        setSelectedNations(prev =>
+            prev.includes(nationId)
+                ? prev.filter(id => id !== nationId)
+                : [...prev, nationId]
+        );
+    };
+
     if (!mounted) return null;
 
     const sidebarContent = (
@@ -91,6 +103,16 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                         onToggleTeam={toggleTeam}
                         onBack={() => setDetailView(null)}
                         onReset={() => setSelectedTeams([])}
+                        onApply={() => setDetailView(null)}
+                    />
+                )}
+                {/* Nation Detail View Overlay */}
+                {detailView === "nations" && (
+                    <NationDetailView
+                        selectedNations={selectedNations}
+                        onToggleNation={toggleNation}
+                        onBack={() => setDetailView(null)}
+                        onReset={() => setSelectedNations([])}
                         onApply={() => setDetailView(null)}
                     />
                 )}
@@ -178,18 +200,19 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                         {/* Nation */}
                         <div className="border-b border-gray-700">
                             <button
-                                onClick={() => toggleSection("nation")}
+                                onClick={() => setDetailView("nations")}
                                 className="w-full flex items-center justify-between p-6 text-white hover:bg-zinc-800 hover:underline hover:cursor-pointer transition"
                             >
                                 <span className="font-medium">Nation</span>
-                                <ArrowRight />
-                            </button>
-                            {expandedSections.includes("nation") && (
-                                <div className="px-6 pb-4 text-gray-400 text-sm">
-                                    {/* Add nation options here */}
-                                    <p>Filter options coming soon...</p>
+                                <div className="flex items-center gap-2">
+                                    {selectedNations.length > 0 && (
+                                        <span className="flex items-center justify-center w-6 h-6 bg-gray-700 text-white text-xs font-semibold rounded-full">
+                                            {selectedNations.length}
+                                        </span>
+                                    )}
+                                    <ArrowRight />
                                 </div>
-                            )}
+                            </button>
                         </div>
 
                         {/* PlayStyles */}
@@ -241,6 +264,7 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                                 setSortBy("rank");
                                 setSelectedPositions([]);
                                 setSelectedTeams([]);
+                                setSelectedNations([]);
                                 onResetFilters();
                             }}
                             className="flex-1 px-4 py-3 border border-gray-600 text-white rounded-full hover:bg-gray-800 transition font-medium"
@@ -248,7 +272,7 @@ export default function FilterSidebar({ isOpen, onClose, onApplyFilters, onReset
                             Reset Filters
                         </button>
                         <button
-                            onClick={() => onApplyFilters(activeTab, sortBy, selectedPositions, selectedTeams)}
+                            onClick={() => onApplyFilters(activeTab, sortBy, selectedPositions, selectedTeams, selectedNations)}
                             className="flex-1 px-4 py-3 bg-green-500 text-black rounded-full hover:bg-green-600 transition font-semibold"
                         >
                             Apply Filters
