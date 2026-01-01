@@ -95,17 +95,29 @@ export default function TanstackRankingTable(
 
     // Define data source
     const data = useMemo(() => {
-        if (activeTab === "all") return players;
-        // Filter by gender based on activeTab
-        return players.filter(player => {
-            if (activeTab === "mens") {
-                return player.gender?.id === 0; // Assuming 0 is male
-            } else if (activeTab === "womens") {
-                return player.gender?.id === 1; // Assuming 1 is female
-            }
-            return true;
-        });
-    }, [players, activeTab]);
+        let filteredPlayers = players;
+        if (activeTab !== "all") {
+            // Filter by gender
+            filteredPlayers = filteredPlayers.filter(player => {
+                if (activeTab === "mens") {
+                    return player.gender?.id === 0; // Assuming 0 is male
+                } else if (activeTab === "womens") {
+                    return player.gender?.id === 1; // Assuming 1 is female
+                }
+                return true;
+            });
+        }
+
+        // Filter by selected positions
+        if (selectedPositions.length > 0) {
+            console.log("Filtering by positions:", selectedPositions);
+
+            filteredPlayers = filteredPlayers.filter(player => player.position && selectedPositions.includes(player.position.shortLabel));
+        }
+
+        // Return final list of players after applying filters
+        return filteredPlayers;
+    }, [players, activeTab, selectedPositions]);
 
     // State for pagination, including page index and page size
     const [pagination, setPagination] = useState({
