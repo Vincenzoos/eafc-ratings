@@ -111,14 +111,18 @@ export default function TanstackRankingTable(
 
         // Filter by selected positions
         if (selectedPositions.length > 0) {
-            console.log("Filtering by positions:", selectedPositions);
-
             filteredPlayers = filteredPlayers.filter(player => player.position && selectedPositions.includes(player.position.shortLabel));
+        }
+
+        // Filter by selected teams
+        if (selectedTeams.length > 0) {
+            console.log("Filtering by teams:", selectedTeams);
+            filteredPlayers = filteredPlayers.filter(player => player.team && selectedTeams.includes(player.team.label));
         }
 
         // Return final list of players after applying filters
         return filteredPlayers;
-    }, [players, activeTab, selectedPositions]);
+    }, [players, activeTab, selectedPositions, selectedTeams]);
 
     // State for pagination, including page index and page size
     const [pagination, setPagination] = useState({

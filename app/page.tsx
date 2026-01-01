@@ -10,7 +10,7 @@ export default function Home() {
     <div className="flex flex-col min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
       <section className="w-full bg-black text-white py-20">
         <div className="max-w-3xl mx-auto text-center px-6">
-          <Image src="/eafc-logo.png" alt="EAFC Logo" width={400} height={400} className="mx-auto mb-6" />
+          <Image src="/eafc-logo.png" alt="EAFC Logo" width={400} height={400} loading="eager" className="mx-auto mb-6" />
           <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">FC Player Ratings Reveal</h1>
           <p className="text-lg md:text-xl text-zinc-300 mb-8">Explore the complete Ratings and PlayStyles for the 17,000+ players available in EA SPORTS FC™.</p>
         </div>
