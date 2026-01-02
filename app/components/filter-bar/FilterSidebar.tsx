@@ -3,9 +3,9 @@ import { ArrowRight, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { GenderFilter, SORT_OPTIONS, SortOption } from "../../types/filters";
-import PositionDetailView from "../PositionDetailView";
 import LeagueAndTeamDetailView from "./LeagueAndTeamDetailView";
 import NationDetailView from "./NationDetailView";
+import PositionDetailView from "./PositionDetailView";
 
 interface FilterSidebarProps {
     isOpen: boolean;

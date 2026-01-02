@@ -27,6 +27,7 @@ import FilterBar from "./filter-bar/FilterBar";
 import FilterSidebar from "./filter-bar/FilterSidebar";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import { GenderFilter, SortOption } from "../types/filters";
+import Link from "next/link";
 
 interface TanstackRankingTable {
     playersPromise: Promise<Player[]>
@@ -170,10 +171,10 @@ export default function TanstackRankingTable(
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <div className="flex items-center gap-3 min-w-max py-1">
+                    <Link href={`/player-profile/${p.id}`} className="flex items-center gap-3 min-w-max py-1">
                         <Avatar src={p.shieldUrl} alt={`${p.firstName} ${p.lastName} shield`} />
                         <span className="text-lg text-white">{p.commonName ?? `${p.firstName} ${p.lastName}`}</span>
-                    </div>
+                    </Link>
                 );
             },
             filterFn: fuzzyFilter,

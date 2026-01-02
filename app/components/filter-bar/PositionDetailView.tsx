@@ -1,6 +1,6 @@
 "use client"
+import { POSITION_OPTIONS } from "@/app/types/filters";
 import { Check, ChevronLeft } from "lucide-react";
-import { POSITION_OPTIONS } from "../types/filters";
 
 interface PositionDetailViewProps {
     selectedPositions: string[];
