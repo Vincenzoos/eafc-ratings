@@ -1,6 +1,7 @@
 import { getPlayers } from "./services/ApiService";
 import TanstackRankingTable from "./components/TanstackRankingTable";
 import Image from "next/image";
+import TopStatsSection from "./components/topstat/TopStatsSection";
 
 export default function Home() {
   // Fetch data from api
@@ -19,6 +20,9 @@ export default function Home() {
       <div className="w-full">
         <TanstackRankingTable playersPromise={playersPromise} />
       </div>
+
+      {/* Add the TopStatsSection here */}
+      <TopStatsSection playersPromise={playersPromise} />
     </div>
   );
 }
