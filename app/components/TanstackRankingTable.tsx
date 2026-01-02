@@ -23,8 +23,8 @@ import {
     TableCell,
 } from "./table";
 import SearchBar from "./SearchBar";
-import FilterBar from "./FilterBar";
-import FilterSidebar from "./FilterSidebar";
+import FilterBar from "./filter-bar/FilterBar";
+import FilterSidebar from "./filter-bar/FilterSidebar";
 import { rankItem } from "@tanstack/match-sorter-utils";
 import { GenderFilter, SortOption } from "../types/filters";
 

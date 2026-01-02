@@ -2,7 +2,7 @@
 import { ChevronLeft, ChevronDown, ChevronUp, Shield, Check } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { TEAM_OPTIONS } from "../types/filters";
+import { TEAM_OPTIONS } from "../../types/filters";
 
 interface LeagueAndTeamDetailViewProps {
     selectedTeams: string[];

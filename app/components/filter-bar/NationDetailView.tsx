@@ -2,7 +2,7 @@
 import { ChevronLeft, Check, Shield } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { NATION_OPTIONS } from "../types/filters";
+import { NATION_OPTIONS } from "../../types/filters";
 
 interface NationDetailViewProps {
     selectedNations: string[];
@@ -54,7 +54,7 @@ export default function NationDetailView({
     onReset,
     onApply
 }: NationDetailViewProps) {
-    
+
     return (
         <div className="absolute inset-0 bg-zinc-900 z-10 flex flex-col">
             {/* Detail View Header */}

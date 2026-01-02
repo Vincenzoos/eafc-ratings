@@ -1,7 +1,7 @@
 "use client"
 
 import { SlidersVertical, X } from "lucide-react";
-import { GenderFilter, SortOption, TEAM_OPTIONS, NATION_OPTIONS } from "../types/filters";
+import { GenderFilter, SortOption, TEAM_OPTIONS, NATION_OPTIONS } from "../../types/filters";
 
 interface FilterBarProps {
     onFilterClick: () => void;
