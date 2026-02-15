@@ -39,7 +39,7 @@ const NationItem = ({ nation, isSelected, onToggle }: { nation: typeof NATION_OP
             </div>
             <input
                 type="checkbox"
-                className="hidden"
+                className="sr-only"
                 checked={isSelected}
                 onChange={() => onToggle(nation.id)}
             />
