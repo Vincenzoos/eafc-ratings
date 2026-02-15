@@ -86,6 +86,7 @@ export default function LeagueAndTeamDetailView({
             <div className="flex items-center gap-4 p-6 border-b border-gray-700">
                 <button
                     onClick={onBack}
+                    aria-label="Back"
                     className="flex items-center justify-center w-10 h-10 rounded-full hover:cursor-pointer text-white hover:bg-gray-700 transition-colors"
                 >
                     <ChevronLeft size={24} />
