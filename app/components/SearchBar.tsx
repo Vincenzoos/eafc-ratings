@@ -1,11 +1,12 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 
 type SearchBarProps = {
     placeholder?: string;
     ariaLabel?: string;
     defaultValue?: string;
+    value?: string;
     onSearch?: (query: string) => void;
     className?: string;
 };
@@ -14,10 +15,18 @@ export default function SearchBar({
     placeholder = 'Search Player',
     ariaLabel = 'Search players',
     defaultValue = '',
+    value: externalValue,
     onSearch,
     className,
 }: SearchBarProps) {
-    const [query, setQuery] = useState(defaultValue);
+    const [query, setQuery] = useState(externalValue ?? defaultValue);
+
+    // Sync with external value (globalFilterState of the table) changes (e.g., when Reset button is clicked)
+    useEffect(() => {
+        if (externalValue !== undefined) {
+            setQuery(externalValue);
+        }
+    }, [externalValue]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,7 +46,7 @@ export default function SearchBar({
                     placeholder={placeholder}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="w-full rounded-full bg-zinc-900/60 placeholder-zinc-400 text-white py-4 pl-6 pr-12 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-700"
+                    className="w-full rounded-full bg-zinc-900/60 placeholder-zinc-400 text-white py-4 pl-6 pr-12 border border-zinc-800 focus:outline-none focus:ring-2 hover:ring-2 hover:ring-zinc-700 focus:ring-green-500"
                 />
 
                 <button

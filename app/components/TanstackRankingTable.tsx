@@ -1,9 +1,18 @@
 "use client"
-import { Suspense, use } from "react";
+import { Suspense, use, useEffect, useState } from "react";
 import { Player, STAT_COLUMNS } from "../types/player";
-import { useReactTable, getCoreRowModel, flexRender, Row, ColumnDef } from "@tanstack/react-table";
+import {
+    useReactTable,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getSortedRowModel,
+    SortingState,
+    flexRender, ColumnDef,
+    getPaginationRowModel
+} from "@tanstack/react-table";
 import { useMemo } from "react";
 import Avatar from "./Avatar";
+import Pagination from "./Pagination";
 import {
     TableContainer,
     TableHead,
@@ -13,6 +22,12 @@ import {
     TableRow,
     TableCell,
 } from "./table";
+import SearchBar from "./SearchBar";
+import FilterBar from "./filter-bar/FilterBar";
+import FilterSidebar from "./filter-bar/FilterSidebar";
+import { rankItem } from "@tanstack/match-sorter-utils";
+import { GenderFilter, SortOption } from "../types/filters";
+import Link from "next/link";
 
 interface TanstackRankingTable {
     playersPromise: Promise<Player[]>
@@ -20,14 +35,117 @@ interface TanstackRankingTable {
 
 
 
+const fuzzyFilter = (row: any, columnId: any, value: any, addMeta: any) => {
+    // Rank the item
+    const itemRank = rankItem(row.getValue(columnId), value);
+
+    // Store the itemRank info
+    addMeta({
+        itemRank,
+    });
+
+    // Return if the item should be filtered in/out
+    return itemRank.passed;
+};
+
+// Map SortOption to column accessor keys and sorting direction
+const getSortingFromOption = (sortOption: SortOption): SortingState => {
+    switch (sortOption) {
+        case "overall":
+            return [{ id: "overallRating", desc: true }]; // Descending (highest first)
+        case "pace":
+            return [{ id: "pac", desc: true }];
+        case "shooting":
+            return [{ id: "sho", desc: true }];
+        case "passing":
+            return [{ id: "pas", desc: true }];
+        case "dribbling":
+            return [{ id: "dri", desc: true }];
+        case "defending":
+            return [{ id: "def", desc: true }];
+        case "physicality":
+            return [{ id: "phy", desc: true }];
+        default:
+            return [{ id: "rank", desc: false }];
+    }
+};
+
 export default function TanstackRankingTable(
     { playersPromise }: TanstackRankingTable
 ) {
     // Use the 'use' hook to unwrap the promise and get the actual data
     const players = use(playersPromise);
 
+
+    // Add filter states
+    const [activeTab, setActiveTab] = useState<GenderFilter>("all");
+    const [sortBy, setSortBy] = useState<SortOption>("rank");
+    const [selectedPositions, setSelectedPositions] = useState<string[]>([]);
+    const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
+    const [selectedNations, setSelectedNations] = useState<string[]>([]);
+
+
+    // Define global filter state
+    const [globalFilter, setGlobalFilter] = useState("");
+    const [sorting, setSorting] = useState<SortingState>(getSortingFromOption(sortBy));
+
+
+    // Update sorting when sortBy changes
+    useEffect(() => {
+        setSorting(getSortingFromOption(sortBy));
+    }, [sortBy]);
+
+    useEffect(() => {
+        setPagination(p => ({ ...p, pageIndex: 0 }));
+    }, [globalFilter, activeTab, sortBy, selectedPositions, selectedTeams, selectedNations]);
+
     // Define data source
-    const data = useMemo(() => players, []);
+    const data = useMemo(() => {
+        let filteredPlayers = players;
+        if (activeTab !== "all") {
+            // Filter by gender
+            filteredPlayers = filteredPlayers.filter(player => {
+                if (activeTab === "mens") {
+                    return player.gender?.id === 0; // Assuming 0 is male
+                } else if (activeTab === "womens") {
+                    return player.gender?.id === 1; // Assuming 1 is female
+                }
+                return true;
+            });
+        }
+
+        // Filter by selected positions
+        if (selectedPositions.length > 0) {
+            filteredPlayers = filteredPlayers.filter(player => player.position && selectedPositions.includes(player.position.shortLabel));
+        }
+
+        // Filter by selected teams
+        if (selectedTeams.length > 0) {
+            console.log("Filtering by teams:", selectedTeams);
+            filteredPlayers = filteredPlayers.filter(player => player.team && selectedTeams.includes(player.team.label));
+        }
+
+        // Filter by selected nations
+        if (selectedNations.length > 0) {
+            console.log("Filtering by nations:", selectedNations);
+            filteredPlayers = filteredPlayers.filter(player => player.nationality && selectedNations.includes(player.nationality.label));
+        }
+
+        // Return final list of players after applying filters
+        return filteredPlayers;
+    }, [players, activeTab, selectedPositions, selectedTeams, selectedNations]);
+
+    // State for pagination, including page index and page size
+    const [pagination, setPagination] = useState({
+        pageIndex: 0,
+        pageSize: 10, // Default page size is passed as a prop
+    });
+
+
+    // Add filter sidebar state
+    const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false);
+
+
 
     // Define columns
     const columns: ColumnDef<Player>[] = useMemo(() => [
@@ -37,6 +155,7 @@ export default function TanstackRankingTable(
             header: "",
             cell: () => null,
             size: 200, // Adjust this value to control left padding
+            enableSorting: false,
         },
         {
             accessorKey: "rank",
@@ -47,24 +166,27 @@ export default function TanstackRankingTable(
             size: 60,
         },
         {
-            accessorKey: "player",
+            // Custom accessor to use player names for sorting and filtering
+            accessorFn: (row) => row.commonName ?? `${row.firstName} ${row.lastName}`,
             header: "PLAYER",
+            id: "player",
             meta: { hoverable: true },
             cell: ({ row }) => {
                 const p = row.original;
                 return (
-                    <div className="flex items-center gap-3 min-w-max py-1">
+                    <Link href={`/player-profile/${p.id}`} className="flex items-center gap-3 min-w-max py-1">
                         <Avatar src={p.shieldUrl} alt={`${p.firstName} ${p.lastName} shield`} />
                         <span className="text-lg text-white">{p.commonName ?? `${p.firstName} ${p.lastName}`}</span>
-                    </div>
+                    </Link>
                 );
             },
+            filterFn: fuzzyFilter,
         },
         {
             accessorKey: "nationality",
             header: "NAT",
             meta: { hoverable: true },
-            cell: ({ row }) => {
+            cell: ({ row }: any) => {
                 const nat = row.original.nationality;
                 if (!nat) return null;
                 return (
@@ -106,7 +228,7 @@ export default function TanstackRankingTable(
             accessorKey: "position",
             header: "POS",
             meta: { hoverable: true },
-            cell: ({ row }) => {
+            cell: ({ row }: any) => {
                 const label = row.original.position?.label?.trim() ?? "";
                 if (!label) return null;
 
@@ -114,17 +236,18 @@ export default function TanstackRankingTable(
                     return <div title={label} className="flex items-center justify-center"><span className="font-bold text-white bg-gray-700 px-2 py-1 rounded">GK</span></div>;
                 }
 
-                const words = label.split(/[\s-]+/).map(w => w.replace(/[^A-Za-z]/g, "")).filter(Boolean);
+                const words = label.split(/[\s-]+/).map((w: any) => w.replace(/[^A-Za-z]/g, "")).filter(Boolean);
                 const abbr =
                     words.length === 1
                         ? words[0].slice(0, 2).toUpperCase()
-                        : words.map(w => w[0]?.toUpperCase() ?? "").join("");
+                        : words.map((w: any) => w[0]?.toUpperCase() ?? "").join("");
 
                 return <div title={label} className="flex items-center justify-center"><span className="font-bold text-white bg-gray-700 px-2 py-1 rounded">{abbr}</span></div>;
             },
             size: 50,
         },
         {
+            // Accessor key: direct access to record field (object from data/api)
             accessorKey: "overallRating",
             header: "OVR",
             cell: ({ row }) => (
@@ -133,7 +256,10 @@ export default function TanstackRankingTable(
             size: 150,
         },
         ...STAT_COLUMNS.map((stat, index) => ({
-            accessorFn: (row: Player) => row.stats?.[stat.key] ?? "-",
+            // Accessor function: custom logic to extract value from record
+            accessorFn: (row: Player) => row.stats?.[stat.key]?.value ?? 0,
+            // Unique ID for the column, used for sorting. Must be provided when using accessorFn
+            id: stat.key,
             header: stat.label,
             meta: { fillBackground: true },
             cell: ({ row }: any) => {
@@ -156,6 +282,7 @@ export default function TanstackRankingTable(
             header: "",
             cell: () => null,
             size: 200, // Adjust this value to control right padding
+            enableSorting: false,
         },
     ], []);
 
@@ -163,47 +290,173 @@ export default function TanstackRankingTable(
     const table = useReactTable({
         data,
         columns,
+        filterFns: {
+            fuzzy: fuzzyFilter, // Register fuzzy filter globally
+        },
+        state: {
+            globalFilter, // Manage the global filter state
+            pagination, // Bind pagination state
+            sorting, // Manage the sorting state
+        },
+        onPaginationChange: setPagination, // Handle pagination state changes
+        onGlobalFilterChange: setGlobalFilter, // Update the global filter state when it changes
+        globalFilterFn: fuzzyFilter, // Specify the fuzzy filter function for global filtering
+        onSortingChange: setSorting, // Update the sorting state when sorting changes
         getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(), // Enable filtering
+        getPaginationRowModel: getPaginationRowModel(), // Enable pagination
+        getSortedRowModel: getSortedRowModel(), // Enable sorting
     })
 
+    const handleResetAll = () => {
+        setGlobalFilter("");
+        setActiveTab("all");
+        setSortBy("rank");
+        setSelectedPositions([]);
+        setSelectedTeams([]);
+        setSelectedNations([]);
+    };
+
+    const handleApplyFilters = (tab: GenderFilter, sort: SortOption, positions: string[], teams: string[], nations: string[]) => {
+        setActiveTab(tab);
+        setSortBy(sort);
+        setSelectedPositions(positions);
+        setSelectedTeams(teams);
+        setSelectedNations(nations);
+        setIsFilterSidebarOpen(false);
+    };
+
+    const handleResetFilters = () => {
+        setActiveTab("all");
+        setSortBy("rank");
+        setSelectedPositions([]);
+        setSelectedTeams([]);
+        setSelectedNations([]);
+    };
+
+    const handleRemoveFilter = (filterType: "tab" | "sort" | "position" | "team" | "nation", filterId?: string) => {
+        if (filterType === "tab") {
+            setActiveTab("all");
+        } else if (filterType === "sort") {
+            setSortBy("rank");
+        } else if (filterType === "position" && filterId) {
+            setSelectedPositions(prev => prev.filter(id => id !== filterId));
+        } else if (filterType === "team" && filterId) {
+            setSelectedTeams(prev => prev.filter(id => id !== filterId));
+        } else if (filterType === "nation" && filterId) {
+            setSelectedNations(prev => prev.filter(id => id !== filterId));
+        }
+    };
+
     return (
-        <Suspense fallback={<p className="text-white p-4">Loading...</p>}>
-            <TableContainer>
-                <TableHead>
-                    {table.getHeaderGroups().map(headerGroup => (
-                        <TableHeaderRow key={headerGroup.id}>
-                            {headerGroup.headers.map(header => (
-                                <TableHeaderCell
-                                    key={header.id}
-                                    width={header.getSize()}
-                                    align={["player"].includes(header.column.id) ? "left" : "center"}
+        <>
+            {/* Filter Sidebar */}
+            <FilterSidebar
+                isOpen={isFilterSidebarOpen}
+                onClose={() => setIsFilterSidebarOpen(false)}
+                onApplyFilters={handleApplyFilters}
+                onResetFilters={handleResetFilters}
+                activeTab={activeTab}
+                sortBy={sortBy}
+                selectedPositions={selectedPositions}
+                selectedTeams={selectedTeams}
+                selectedNations={selectedNations}
+            />
+
+            {/* SearchBar */}
+            <div className="w-full bg-black -mt-20 pb-20">
+                {/* set value to globalFilter, managed by table state */}
+                <SearchBar
+                    placeholder="Search players..."
+                    onSearch={(query) => setGlobalFilter(query)}
+                    value={globalFilter}
+                    className="max-w-2xl mx-auto"
+                />
+            </div >
+
+            {/* Filter Bar */}
+            <FilterBar
+                onFilterClick={() => setIsFilterSidebarOpen(true)}
+                resultsCount={table.getFilteredRowModel().rows.length}
+                onResetAll={handleResetAll}
+                activeTab={activeTab}
+                sortBy={sortBy}
+                selectedPositions={selectedPositions}
+                selectedTeams={selectedTeams}
+                selectedNations={selectedNations}
+                onRemoveFilter={handleRemoveFilter}
+            />
+            {/* TODO: Replace loading text with skeleton table */}
+            <Suspense fallback={<p className="text-white p-4">Loading...</p>}>
+                {/* Table */}
+                <TableContainer>
+                    <TableHead>
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <TableHeaderRow key={headerGroup.id}>
+                                {headerGroup.headers.map(header => (
+                                    <TableHeaderCell
+                                        key={header.id}
+                                        width={header.getSize()}
+                                        align={["player"].includes(header.column.id) ? "left" : "center"}
+                                    >
+                                        {flexRender(header.column.columnDef.header, header.getContext())}
+                                    </TableHeaderCell>
+                                ))}
+                            </TableHeaderRow>
+                        ))}
+                    </TableHead>
+                    <TableBody>
+                        {/* Show rows when there are results */}
+                        {table.getRowModel().rows.length > 0 ? (
+                            table.getRowModel().rows.map((row, idx) => (
+                                <TableRow
+                                    key={row.id}
+                                    isAlternate={idx % 2 !== 0}
                                 >
-                                    {flexRender(header.column.columnDef.header, header.getContext())}
-                                </TableHeaderCell>
-                            ))}
-                        </TableHeaderRow>
-                    ))}
-                </TableHead>
-                <TableBody>
-                    {table.getRowModel().rows.map((row, idx) => (
-                        <TableRow
-                            key={row.id}
-                            isAlternate={idx % 2 !== 0}
-                        >
-                            {row.getVisibleCells().map(cell => (
-                                <TableCell
-                                    key={cell.id}
-                                    width={cell.column.columnDef.size}
-                                    isHoverable={!!(cell.column.columnDef as any).meta?.hoverable}
-                                    noPadding={!!(cell.column.columnDef as any).meta?.fillBackground}
-                                >
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    {row.getVisibleCells().map(cell => (
+                                        <TableCell
+                                            key={cell.id}
+                                            width={cell.column.columnDef.size}
+                                            isHoverable={!!(cell.column.columnDef as any).meta?.hoverable}
+                                            noPadding={!!(cell.column.columnDef as any).meta?.fillBackground}
+                                        >
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            // Show not found message when no results
+                            <TableRow>
+                                <TableCell width={100} noPadding={false} colSpan={table.getAllColumns().length}>
+                                    <div className="flex flex-col items-center justify-center py-16 text-center w-full">
+                                        <div className="text-red-500 text-4xl mb-4">⚠</div>
+                                        <h3 className="text-white text-lg font-semibold mb-5">0 Results Found</h3>
+                                        <p className="text-white text-xl mb-5">Please try adjusting your search or filters</p>
+                                        <button
+                                            onClick={() => setGlobalFilter("")}
+                                            className="mt-4 px-6 py-2 border border-green-500 text-white text-md font-bold rounded-full hover:bg-green-500 hover:text-black transition"
+                                        >
+                                            Reset
+                                        </button>
+                                    </div>
                                 </TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </TableContainer>
-        </Suspense >
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </TableContainer>
+
+                {/* Pagination */}
+                {/* Only show pagination when there are results */}
+                {table.getRowModel().rows.length > 0 && (
+                    <Pagination
+                        currentPage={table.getState().pagination.pageIndex + 1}
+                        totalPages={table.getPageCount()}
+                        onPageChange={(page) => table.setPageIndex(page - 1)}
+                        canPreviousPage={table.getCanPreviousPage()}
+                        canNextPage={table.getCanNextPage()}
+                    />)}
+            </Suspense >
+        </>
     )
 }
