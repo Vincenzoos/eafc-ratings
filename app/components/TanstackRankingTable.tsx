@@ -95,6 +95,9 @@ export default function TanstackRankingTable(
         setSorting(getSortingFromOption(sortBy));
     }, [sortBy]);
 
+    useEffect(() => {
+        setPagination(p => ({ ...p, pageIndex: 0 }));
+    }, [globalFilter, activeTab, sortBy, selectedPositions, selectedTeams, selectedNations]);
 
     // Define data source
     const data = useMemo(() => {
