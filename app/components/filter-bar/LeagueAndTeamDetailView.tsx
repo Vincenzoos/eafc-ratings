@@ -28,6 +28,7 @@ const TeamItem = ({ team, isSelected, onToggle }: { team: typeof TEAM_OPTIONS[0]
                             alt={team.name}
                             width={24}
                             height={24}
+                            unoptimized={true}
                             onError={() => setImgError(true)}
                         />
                     )}

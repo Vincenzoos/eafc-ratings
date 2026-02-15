@@ -51,6 +51,8 @@ export const NATION_OPTIONS = [
     { id: "Spain", name: "Spain", flag: "https://flagcdn.com/w40/es.png" },
 ] as const;
 
+export type Nation = (typeof NATION_OPTIONS)[number];
+
 
 export const TEAM_OPTIONS = [
     { id: "FC Barcelona", name: "FC Barcelona", logo: "https://drop-assets.ea.com/images/1omg1GUYiuhDZzro6k79Gp/c3c15c873e984dae4e34fac491248b33/l116325.png" },

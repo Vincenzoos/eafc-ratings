@@ -2,7 +2,7 @@
 import { ChevronLeft, Check, Shield } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { NATION_OPTIONS } from "../../types/filters";
+import { NATION_OPTIONS, type Nation } from "../../types/filters";
 
 interface NationDetailViewProps {
     selectedNations: string[];
@@ -12,7 +12,7 @@ interface NationDetailViewProps {
     onApply: () => void;
 }
 
-const NationItem = ({ nation, isSelected, onToggle }: { nation: typeof NATION_OPTIONS[0], isSelected: boolean, onToggle: (id: string) => void }) => {
+const NationItem = ({ nation, isSelected, onToggle }: { nation: Nation, isSelected: boolean, onToggle: (id: string) => void }) => {
     const [imgError, setImgError] = useState(false);
 
     return (
@@ -26,6 +26,7 @@ const NationItem = ({ nation, isSelected, onToggle }: { nation: typeof NATION_OP
                             src={nation.flag}
                             alt={nation.name}
                             fill
+                            unoptimized={true}
                             className="object-cover"
                             onError={() => setImgError(true)}
                         />
