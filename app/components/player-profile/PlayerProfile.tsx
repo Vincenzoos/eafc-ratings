@@ -77,7 +77,13 @@ const STAT_GROUPS = [
 ];
 
 export default function PlayerProfile({ player, allPlayers }: PlayerProfileProps) {
-    const age = new Date().getFullYear() - new Date(player.birthdate).getFullYear();
+    const birthDate = new Date(player.birthdate);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const hadBirthday =
+        today.getMonth() > birthDate.getMonth() ||
+        (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+    if (!hadBirthday) age -= 1;
     const description = `${player.commonName || `${player.firstName} ${player.lastName}`}'s overall rating in EA SPORTS FC™ 26 is ${player.overallRating}. ${player.commonName || player.lastName} is a professional footballer from ${player.nationality.label} who plays as a ${player.position.label} (${player.position.shortLabel}) for ${player.team.label}.${player.playerAbilities?.length > 0 ? ` ${player.commonName || player.lastName} has the ${player.playerAbilities[0].label} PlayStyle+ ability` : ""}`;
 
     // Get similar players based on position (exclude current player)
